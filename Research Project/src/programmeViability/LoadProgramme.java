@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -34,6 +36,7 @@ public class LoadProgramme {
 	 */
 	
 	JLabel programmeLabel = new JLabel("Please Load File");
+	List<ModuleClass> modules = new ArrayList<ModuleClass>();
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -111,9 +114,18 @@ public class LoadProgramme {
 					BufferedReader br = new BufferedReader(isr);
 					) {
 				String line = br.readLine();
-                String[] module = line.split(",");
+	            while ((line = br.readLine()) != null) {
 
-                System.out.println("Module code = " + module[5] + module[6]);
+	                // use comma as separator
+	                String[] module = line.split(",");
+
+	                System.out.println("Module code = " + module[5] + module[6]);
+	                ModuleClass mod = new ModuleClass(module[0], module[1], module[2], module[3], module[4], module[5], module[6]);
+	                modules.add(mod);
+	                
+
+	            }
+	            
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
