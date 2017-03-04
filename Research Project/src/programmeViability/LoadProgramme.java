@@ -3,6 +3,7 @@
  */
 package programmeViability;
 
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -21,6 +22,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,6 +44,7 @@ public class LoadProgramme {
 	JPanel midPanel = new JPanel();
 	ProgrammeClass programme = null;
 	JLabel programmeLabel = new JLabel("Please Load File");
+	JFrame screen1 = new JFrame("Programme Viability Tool");
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -49,7 +52,6 @@ public class LoadProgramme {
 
 	}
 	public LoadProgramme() {
-		JFrame screen1 = new JFrame("Programme Viability Tool");
 		
 		JPanel basic = new JPanel();
 		basic.setMaximumSize(basic.getPreferredSize());
@@ -71,11 +73,19 @@ public class LoadProgramme {
 			@Override
 			public void actionPerformed(ActionEvent event){
 				loadFile();
-				DisplayProgramme();
+				displayProgramme();
 			}
 
 		});
 		JButton addModuleButton = new JButton("Add Module");
+		
+		addModuleButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event){
+				addModule();
+			}
+
+		});
 		
 		JButton exitButton = new JButton("Exit");
 		exitButton.addActionListener(new ActionListener(){
@@ -188,7 +198,7 @@ public class LoadProgramme {
 		programme = prog;
 	}
 	
-	public void DisplayProgramme() {
+	public void displayProgramme() {
 		
 		midPanel.removeAll();
 		String header [] = new String[] {
@@ -222,6 +232,17 @@ public class LoadProgramme {
 				}
 			}
 		}
+	}
+	
+	public void addModule() {
+		JDialog addModuleDialog = new JDialog(screen1);
+		
+		addModuleDialog.setTitle("Add Module");
+		addModuleDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		addModuleDialog.setSize(500, 300);
+		addModuleDialog.setLocationRelativeTo(screen1);
+		addModuleDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		addModuleDialog.setVisible(true);
 	}
 
 }
