@@ -19,14 +19,19 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
- * @author sitongchen
+ * @author Sitong Chen
  *
  */
 public class LoadProgramme {
@@ -34,9 +39,9 @@ public class LoadProgramme {
 	/**
 	 * @param args
 	 */
-	
+	JPanel midPanel = new JPanel();
+	ProgrammeClass programme = null;
 	JLabel programmeLabel = new JLabel("Please Load File");
-	List<ModuleClass> modules = new ArrayList<ModuleClass>();
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -57,7 +62,6 @@ public class LoadProgramme {
 		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		JPanel midPanel = new JPanel();
 		midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.X_AXIS));
 		JPanel botPanel = new JPanel();
 		botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.X_AXIS));
@@ -67,6 +71,7 @@ public class LoadProgramme {
 			@Override
 			public void actionPerformed(ActionEvent event){
 				loadFile();
+				DisplayProgramme();
 			}
 
 		});
@@ -79,6 +84,8 @@ public class LoadProgramme {
 				System.exit(1);
 			}
 		});
+		
+		//listModel.addElement("Please Load A file");
 		
 		programmeLabel.setHorizontalAlignment(JLabel.LEFT);
 		programmeLabel.setFont(new Font("Serif", Font.BOLD, 24));
@@ -103,35 +110,116 @@ public class LoadProgramme {
 	}
 	protected void loadFile() {
 		// TODO Auto-generated method stub
+		
+		ProgrammeClass prog = null;
+		GroupClass group = null;
+		ModuleClass module = null;
+		ActivityClass activity = null;
 		JFileChooser fileChooser = new JFileChooser();
 		int returnValue = fileChooser.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
-			programmeLabel.setText(selectedFile.getName());
 			try (
 					FileInputStream fis = new FileInputStream(selectedFile);
 					InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
 					BufferedReader br = new BufferedReader(isr);
 					) {
+				
 				String line = br.readLine();
 	            while ((line = br.readLine()) != null) {
-
+	            	
+	            	group = null;
+	            	module = null;
+	            	activity = null;
+	            	
 	                // use comma as separator
-	                String[] module = line.split(",");
-
-	                System.out.println("Module code = " + module[5] + module[6]);
-	                ModuleClass mod = new ModuleClass(module[0], module[1], module[2], module[3], module[4], module[5], module[6]);
-	                modules.add(mod);
+	                String[] lineElement = line.split(",");
 	                
+	                if (prog == null) {
+	                	prog = new ProgrammeClass(lineElement[0], lineElement[1], lineElement[2]);
+	                	/*for (int i = 0; i < lineElement.length; i++){
+	                		System.out.println("lineElement " + i + " " + lineElement[i]);
+	                	}*/
+	                }
+	                for (GroupClass grp: prog.getGroups()) {
+	                	if (grp.getOptionalGroup().equals(lineElement[6])){
+	                		group = grp;
+	                	}
+	                }
+	                if (group == null) {
+	                	group = new GroupClass(lineElement[3], lineElement[4], lineElement[5], 
+	                			lineElement[6], lineElement[8], lineElement[9]);
+	                	prog.getGroups().add(group);
+	                }
+	                for (ModuleClass mdl: prog.getModules()) {
+	                	if (mdl.getSubjCode().equals(lineElement[10]) &&
+	                			mdl.getCrseNumb().equals(lineElement[11])) {
+	                		module = mdl;
+	                	}
+	                }
+	                if (module == null) {
+	                	module = new ModuleClass(lineElement[12], lineElement[10],
+	                			 lineElement[11], lineElement[6]);
+	                	prog.getModules().add(module);
+	                }
+	                activity = new ActivityClass(lineElement[14],
+	                		Float.valueOf(lineElement[15]), module.getSubjCode(), module.getCrseNumb());
+	                
+	                prog.getActivities().add(activity);
+	                
+	                module.setHoursPerWeek(module.getHoursPerWeek() + activity.getLength());
+	                prog.Update(module);
+	                
+	                //System.out.println("Module code = " + lineElement[5] + lineElement[6]);
 
+	                programmeLabel.setText(prog.getProgCode() + " " + prog.getProgShortTitle() + " Year " + prog.getYear());
+	        		//listModel.addElement(mod);
+	         
 	            }
-	            
+	            	            
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+		}
+		programme = prog;
+	}
+	
+	public void DisplayProgramme() {
+		
+		midPanel.removeAll();
+		String header [] = new String[] {
+				"Module",
+				"Module Title",
+				"Hours Taught"};
+						
+		for (GroupClass group: programme.getGroups()){
+			
+			DefaultTableModel tableModel = new DefaultTableModel(0, 0);	
+			JTable lineElementTable = new JTable();
+			JScrollPane lineElementList = new JScrollPane(lineElementTable);
+			
+			JPanel groupPanel = new JPanel();
+			groupPanel.setLayout(new BoxLayout(groupPanel, BoxLayout.Y_AXIS));
+			JLabel groupLabel = new JLabel(group.getType() + " " + group.getOptionalGroup());
+			groupLabel.setHorizontalAlignment(JLabel.CENTER);
+			groupLabel.setFont(new Font("Serif", Font.BOLD, 16));
+			
+			tableModel.setColumnIdentifiers(header);
+			lineElementTable.setModel(tableModel);
+			groupPanel.add(groupLabel);
+			groupPanel.add(lineElementList);
+			midPanel.add(groupPanel);
+			tableModel.setRowCount(0);
+			
+			for (ModuleClass module: programme.getModules()){
+				if (module.getOptionalGroup().equals(group.getOptionalGroup())) {
+					tableModel.addRow(new Object[] {module.getSubjCode() + module.getCrseNumb(), module.getTitle(),
+							module.getHoursPerWeek()});
+				}
 			}
 		}
 	}
