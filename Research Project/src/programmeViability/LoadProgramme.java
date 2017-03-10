@@ -65,6 +65,7 @@ public class LoadProgramme {
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 		midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.X_AXIS));
+		midPanel.add(Box.createVerticalStrut(480));
 		JPanel botPanel = new JPanel();
 		botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.X_AXIS));
 		
@@ -87,6 +88,14 @@ public class LoadProgramme {
 
 		});
 		
+		JButton timeTableButton = new JButton("Timetable");
+		timeTableButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event){
+				displayTimeTable();
+			}
+		});
+		
 		JButton exitButton = new JButton("Exit");
 		exitButton.addActionListener(new ActionListener(){
 			@Override
@@ -107,6 +116,8 @@ public class LoadProgramme {
 		buttonPanel.add(loadFileButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(500,0)));
 		buttonPanel.add(addModuleButton);
+		botPanel.add(timeTableButton);
+		botPanel.add(Box.createRigidArea(new Dimension(500,0)));
 		botPanel.add(exitButton);
 		
 		basic.add(topPanel);
@@ -217,8 +228,8 @@ public class LoadProgramme {
 			JLabel groupLabel = new JLabel(group.getType() + " " + group.getOptionalGroup());
 			groupLabel.setHorizontalAlignment(JLabel.CENTER);
 			groupLabel.setFont(new Font("Serif", Font.BOLD, 16));
-			
 			tableModel.setColumnIdentifiers(header);
+			//lineElementTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			lineElementTable.setModel(tableModel);
 			groupPanel.add(groupLabel);
 			groupPanel.add(lineElementList);
@@ -244,5 +255,115 @@ public class LoadProgramme {
 		addModuleDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		addModuleDialog.setVisible(true);
 	}
+	
+	public void displayTimeTable() {
+		JDialog addTimeTableDialog = new JDialog();
+		
+		JPanel basic = new JPanel();
+		basic.setMaximumSize(basic.getPreferredSize());
+		basic.setLayout(new BoxLayout(basic, BoxLayout.Y_AXIS));
+		addTimeTableDialog.add(basic);
+		
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+		JPanel titlePanel = new JPanel();
+		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		JPanel middlePanel = new JPanel();
+		middlePanel.setLayout(new BoxLayout(middlePanel, BoxLayout.X_AXIS));
+		JPanel botPanel = new JPanel();
+		botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.X_AXIS));
+		
+		JLabel timeTableLabel = new JLabel(programme.getProgCode() + " " + programme.getProgShortTitle() + " Year " + programme.getYear());
+		timeTableLabel.setHorizontalAlignment(JLabel.LEFT);
+		timeTableLabel.setFont(new Font("Serif", Font.BOLD, 24));
+		
+		titlePanel.add(timeTableLabel);
+		titlePanel.add(Box.createRigidArea(new Dimension(20,0)));
+		
+		JButton backButton = new JButton("Back");
+		backButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event){
+				addTimeTableDialog.dispose();
+			}
+		});
+		
+		topPanel.add(titlePanel);
+		
+		//https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#simple
+		String times [] = new String[] {
+				"day",
+				"09:00 - 10:00",
+				"10:00 - 11:00",
+				"11:00 - 12:00",
+				"12:00 - 13:00",
+				"13:00 - 14:00",
+				"14:00 - 15:00",
+				"15:00 - 16:00",
+				"16:00 - 17:00"};
+						
+		Object[][] data = {
+			    {"Monday", "09:00 - 10:00",
+					"10:00 - 11:00",
+					"11:00 - 12:00",
+					"12:00 - 13:00",
+					"13:00 - 14:00",
+					"14:00 - 15:00",
+					"15:00 - 16:00",
+					"16:00 - 17:00"},
+			    {"Tuesday", "09:00 - 10:00",
+						"10:00 - 11:00",
+						"11:00 - 12:00",
+						"12:00 - 13:00",
+						"13:00 - 14:00",
+						"14:00 - 15:00",
+						"15:00 - 16:00",
+						"16:00 - 17:00"},
+			    {"Wedneday", "09:00 - 10:00",
+							"10:00 - 11:00",
+							"11:00 - 12:00",
+							"12:00 - 13:00",
+							"13:00 - 14:00",
+							"14:00 - 15:00",
+							"15:00 - 16:00",
+							"16:00 - 17:00"},
+			    {"Thursday", "09:00 - 10:00",
+								"10:00 - 11:00",
+								"11:00 - 12:00",
+								"12:00 - 13:00",
+								"13:00 - 14:00",
+								"14:00 - 15:00",
+								"15:00 - 16:00",
+								"16:00 - 17:00"},
+			    {"Friday", "09:00 - 10:00",
+									"10:00 - 11:00",
+									"11:00 - 12:00",
+									"12:00 - 13:00",
+									"13:00 - 14:00",
+									"14:00 - 15:00",
+									"15:00 - 16:00",
+									"16:00 - 17:00"}
+			};
+			
+		JTable timetable = new JTable(data, times);
+		JScrollPane timetablePane = new JScrollPane(timetable);
+		timetable.setFillsViewportHeight(true);
+        
+		middlePanel.add(timetablePane);
 
+		botPanel.add(backButton);
+		
+		basic.add(topPanel);
+		basic.add(middlePanel);
+		basic.add(botPanel);
+		
+		addTimeTableDialog.setTitle("Timetable");
+		addTimeTableDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		addTimeTableDialog.setSize(1000, 600);
+		addTimeTableDialog.setLocationRelativeTo(screen1);
+		addTimeTableDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		addTimeTableDialog.setVisible(true);
+	}
 }
