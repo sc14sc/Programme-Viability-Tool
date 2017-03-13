@@ -83,11 +83,21 @@ public class ProgrammeClass {
 		return year;
 	}
 	
-	public void Update(ModuleClass module) {
+	public void updateModule(ModuleClass module) {
 		for (int i = 0; i < modules.size(); i++) {
 			if (module.getSubjCode().equals(modules.get(i).getSubjCode()) &&
 					module.getCrseNumb().equals(modules.get(i).getCrseNumb())) {
 				modules.set(i, module);
+			}
+		}
+	}
+	
+	public void updateActivity(ActivityClass activity) {
+		for (int i = 0; i < activities.size(); i++) {
+			if (activity.getDescription().equals(activities.get(i).getDescription()) &&
+					activity.getSubjectCode().equals(activities.get(i).getSubjectCode())
+					&& activity.getCourseNumber().equals(activities.get(i).getCourseNumber())) {
+				activities.set(i, activity);
 			}
 		}
 	}

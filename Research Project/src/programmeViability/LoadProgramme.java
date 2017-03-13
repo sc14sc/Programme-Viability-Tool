@@ -88,6 +88,14 @@ public class LoadProgramme {
 
 		});
 		
+		JButton validateButton = new JButton("Validate");
+		validateButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event){
+				validate();
+			}
+		});
+		
 		JButton timeTableButton = new JButton("Timetable");
 		timeTableButton.addActionListener(new ActionListener(){
 			@Override
@@ -116,6 +124,7 @@ public class LoadProgramme {
 		buttonPanel.add(loadFileButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(500,0)));
 		buttonPanel.add(addModuleButton);
+		botPanel.add(validateButton);
 		botPanel.add(timeTableButton);
 		botPanel.add(Box.createRigidArea(new Dimension(500,0)));
 		botPanel.add(exitButton);
@@ -169,27 +178,27 @@ public class LoadProgramme {
 	                }
 	                if (group == null) {
 	                	group = new GroupClass(lineElement[3], lineElement[4], lineElement[5], 
-	                			lineElement[6], lineElement[8], lineElement[9]);
+	                			lineElement[6], lineElement[7], lineElement[8]);
 	                	prog.getGroups().add(group);
 	                }
 	                for (ModuleClass mdl: prog.getModules()) {
-	                	if (mdl.getSubjCode().equals(lineElement[10]) &&
-	                			mdl.getCrseNumb().equals(lineElement[11])) {
+	                	if (mdl.getSubjCode().equals(lineElement[9]) &&
+	                			mdl.getCrseNumb().equals(lineElement[10])) {
 	                		module = mdl;
 	                	}
 	                }
 	                if (module == null) {
-	                	module = new ModuleClass(lineElement[12], lineElement[10],
-	                			 lineElement[11], lineElement[6]);
+	                	module = new ModuleClass(lineElement[11], lineElement[9],
+	                			 lineElement[10], lineElement[6], lineElement[17], Float.valueOf(lineElement[19]));
 	                	prog.getModules().add(module);
 	                }
-	                activity = new ActivityClass(lineElement[14],
-	                		Float.valueOf(lineElement[15]), module.getSubjCode(), module.getCrseNumb());
+	                activity = new ActivityClass(lineElement[13],
+	                		Float.valueOf(lineElement[14]), module.getSubjCode(), module.getCrseNumb());
 	                
 	                prog.getActivities().add(activity);
 	                
 	                module.setHoursPerWeek(module.getHoursPerWeek() + activity.getLength());
-	                prog.Update(module);
+	                prog.updateModule(module);
 	                
 	                //System.out.println("Module code = " + lineElement[5] + lineElement[6]);
 
@@ -215,7 +224,9 @@ public class LoadProgramme {
 		String header [] = new String[] {
 				"Module",
 				"Module Title",
-				"Hours Taught"};
+				"Sem",
+				"Credits",
+				"Hours"};
 						
 		for (GroupClass group: programme.getGroups()){
 			
@@ -231,6 +242,7 @@ public class LoadProgramme {
 			tableModel.setColumnIdentifiers(header);
 			//lineElementTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			lineElementTable.setModel(tableModel);
+			lineElementTable.getColumnModel().getColumn(2).setMaxWidth(40);;
 			groupPanel.add(groupLabel);
 			groupPanel.add(lineElementList);
 			midPanel.add(groupPanel);
@@ -239,7 +251,7 @@ public class LoadProgramme {
 			for (ModuleClass module: programme.getModules()){
 				if (module.getOptionalGroup().equals(group.getOptionalGroup())) {
 					tableModel.addRow(new Object[] {module.getSubjCode() + module.getCrseNumb(), module.getTitle(),
-							module.getHoursPerWeek()});
+							module.getSemester(), module.getCredits(), module.getHoursPerWeek()});
 				}
 			}
 		}
@@ -294,7 +306,7 @@ public class LoadProgramme {
 		
 		//https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#simple
 		String times [] = new String[] {
-				"day",
+				" ",
 				"09:00 - 10:00",
 				"10:00 - 11:00",
 				"11:00 - 12:00",
@@ -305,50 +317,69 @@ public class LoadProgramme {
 				"16:00 - 17:00"};
 						
 		Object[][] data = {
-			    {"Monday", "09:00 - 10:00",
-					"10:00 - 11:00",
-					"11:00 - 12:00",
-					"12:00 - 13:00",
-					"13:00 - 14:00",
-					"14:00 - 15:00",
-					"15:00 - 16:00",
-					"16:00 - 17:00"},
-			    {"Tuesday", "09:00 - 10:00",
-						"10:00 - 11:00",
-						"11:00 - 12:00",
-						"12:00 - 13:00",
-						"13:00 - 14:00",
-						"14:00 - 15:00",
-						"15:00 - 16:00",
-						"16:00 - 17:00"},
-			    {"Wedneday", "09:00 - 10:00",
-							"10:00 - 11:00",
-							"11:00 - 12:00",
-							"12:00 - 13:00",
-							"13:00 - 14:00",
-							"14:00 - 15:00",
-							"15:00 - 16:00",
-							"16:00 - 17:00"},
-			    {"Thursday", "09:00 - 10:00",
-								"10:00 - 11:00",
-								"11:00 - 12:00",
-								"12:00 - 13:00",
-								"13:00 - 14:00",
-								"14:00 - 15:00",
-								"15:00 - 16:00",
-								"16:00 - 17:00"},
-			    {"Friday", "09:00 - 10:00",
-									"10:00 - 11:00",
-									"11:00 - 12:00",
-									"12:00 - 13:00",
-									"13:00 - 14:00",
-									"14:00 - 15:00",
-									"15:00 - 16:00",
-									"16:00 - 17:00"}
+			    {"Monday", " ",
+					" ",
+					" ",
+					" ",
+					" ",
+					" ",
+					" ",
+					" "},
+			    {"Tuesday", " ",
+						" ",
+						" ",
+						" ",
+						" ",
+						" ",
+						" ",
+						" "},
+			    {"Wedneday", " ",
+							" ",
+							" ",
+							" ",
+							" ",
+							" ",
+							" ",
+							" "},
+			    {"Thursday", " ",
+								" ",
+								" ",
+								" ",
+								" ",
+								" ",
+								" ",
+								" "},
+			    {"Friday", " ",
+									" ",
+									" ",
+									" ",
+									" ",
+									" ",
+									" ",
+									" "}
 			};
-			
-		JTable timetable = new JTable(data, times);
+		
+		for (ActivityClass activity: programme.getActivities()) {
+			if (activity.getDay() != 99) {
+				data[activity.getDay()][activity.getStartTime()] += activity.getSubjectCode()
+						 + activity.getCourseNumber() + " " + activity.getDescription() + "\n";
+			}
+		}
+		
+		DefaultTableModel timeTableModel = new DefaultTableModel() {
+			public Class<String> getColumnClass (int col) {
+				return String.class;
+			}
+			public boolean isCellEditable(int row, int col) {
+				return false;
+			}
+		};
+		timeTableModel.setDataVector(data, times);
+		JTable timetable = new JTable(timeTableModel);
+		timetable.setDefaultRenderer(String.class, new MultiLineTableCellRenderer());
 		JScrollPane timetablePane = new JScrollPane(timetable);
+		timetable.getColumnModel().getColumn(0).setMaxWidth(75);
+		timetable.getColumnModel().getColumn(0).setCellRenderer(new RowHeaderRenderer(timetable));
 		timetable.setFillsViewportHeight(true);
         
 		middlePanel.add(timetablePane);
@@ -366,4 +397,24 @@ public class LoadProgramme {
 		addTimeTableDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		addTimeTableDialog.setVisible(true);
 	}
+	
+	public void validate() {
+		int time = 1;
+		int day = 0;
+		for (ActivityClass activity: programme.getActivities()) {
+			activity.setDay(day);
+			activity.setStartTime(time);
+			programme.updateActivity(activity);
+			time++;
+			if (time > 8) {
+				day++;
+				time = 1;
+			}
+			if (day > 4) {
+				time = 1;
+				day = 0;
+			}
+		}
+	}
+	
 }
