@@ -135,7 +135,7 @@ public class LoadProgramme {
 		basic.add(midPanel);
 		basic.add(botPanel);
 		
-		screen1.setSize(1000, 600);
+		screen1.setSize(1250, 720);
 		screen1.setLocationRelativeTo(null);
 		screen1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		screen1.setVisible(true);
@@ -327,84 +327,10 @@ public class LoadProgramme {
 		topPanel.add(titlePanel);
 		
 		//https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#simple
-		String times [] = new String[] {
-				" ",
-				"09:00 - 10:00",
-				"10:00 - 11:00",
-				"11:00 - 12:00",
-				"12:00 - 13:00",
-				"13:00 - 14:00",
-				"14:00 - 15:00",
-				"15:00 - 16:00",
-				"16:00 - 17:00"};
-						
-		Object[][] data = {
-			    {"Monday", " ",
-					" ",
-					" ",
-					" ",
-					" ",
-					" ",
-					" ",
-					" "},
-			    {"Tuesday", " ",
-						" ",
-						" ",
-						" ",
-						" ",
-						" ",
-						" ",
-						" "},
-			    {"Wedneday", " ",
-							" ",
-							" ",
-							" ",
-							" ",
-							" ",
-							" ",
-							" "},
-			    {"Thursday", " ",
-								" ",
-								" ",
-								" ",
-								" ",
-								" ",
-								" ",
-								" "},
-			    {"Friday", " ",
-									" ",
-									" ",
-									" ",
-									" ",
-									" ",
-									" ",
-									" "}
-			};
-		
-		for (ActivityClass activity: programme.getActivities()) {
-			if (activity.getDay() != 99) {
-				data[activity.getDay()][activity.getStartTime()] += activity.getSubjectCode()
-						 + activity.getCourseNumber() + " " + activity.getDescription() + "\n";
-			}
-		}
-		
-		DefaultTableModel timeTableModel = new DefaultTableModel() {
-			public Class<String> getColumnClass (int col) {
-				return String.class;
-			}
-			public boolean isCellEditable(int row, int col) {
-				return false;
-			}
-		};
-		timeTableModel.setDataVector(data, times);
-		JTable timetable = new JTable(timeTableModel);
-		timetable.setDefaultRenderer(String.class, new MultiLineTableCellRenderer());
-		JScrollPane timetablePane = new JScrollPane(timetable);
-		timetable.getColumnModel().getColumn(0).setMaxWidth(75);
-		timetable.getColumnModel().getColumn(0).setCellRenderer(new RowHeaderRenderer(timetable));
-		timetable.setFillsViewportHeight(true);
+		TimeTable timetablePane = new TimeTable(programme);
         
-		middlePanel.add(timetablePane);
+		middlePanel.add(timetablePane.createTimeTable("1"));
+		middlePanel.add(timetablePane.createTimeTable("2"));
 
 		botPanel.add(backButton);
 		
@@ -414,7 +340,7 @@ public class LoadProgramme {
 		
 		addTimeTableDialog.setTitle("Timetable");
 		addTimeTableDialog.setModalityType(ModalityType.APPLICATION_MODAL);
-		addTimeTableDialog.setSize(1000, 600);
+		addTimeTableDialog.setSize(1250, 720);
 		addTimeTableDialog.setLocationRelativeTo(screen1);
 		addTimeTableDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		addTimeTableDialog.setVisible(true);

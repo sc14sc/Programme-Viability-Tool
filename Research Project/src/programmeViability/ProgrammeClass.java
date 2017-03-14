@@ -92,6 +92,18 @@ public class ProgrammeClass {
 		}
 	}
 	
+	public ModuleClass getModule(String subjectCode, String courseNumber) {
+		
+		ModuleClass module = null;
+		for (int i = 0; i < modules.size(); i++) {
+			if (modules.get(i).getSubjCode().equals(subjectCode) &&
+					modules.get(i).getCrseNumb().equals(courseNumber)) {
+				module = modules.get(i);
+			}
+		}
+		return module;
+	}
+	
 	public void updateActivity(ActivityClass activity) {
 		for (int i = 0; i < activities.size(); i++) {
 			if (activity.getDescription().equals(activities.get(i).getDescription()) &&
