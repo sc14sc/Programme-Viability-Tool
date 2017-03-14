@@ -27,7 +27,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -242,11 +244,31 @@ public class LoadProgramme {
 			tableModel.setColumnIdentifiers(header);
 			//lineElementTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			lineElementTable.setModel(tableModel);
-			lineElementTable.getColumnModel().getColumn(2).setMaxWidth(40);;
+			lineElementTable.getColumnModel().getColumn(0).setMaxWidth(80);
+			lineElementTable.getColumnModel().getColumn(2).setMaxWidth(35);
+			lineElementTable.getColumnModel().getColumn(3).setMaxWidth(45);
+			lineElementTable.getColumnModel().getColumn(4).setMaxWidth(40);
 			groupPanel.add(groupLabel);
 			groupPanel.add(lineElementList);
 			midPanel.add(groupPanel);
 			tableModel.setRowCount(0);
+			
+			JPopupMenu popupMenu = new JPopupMenu();
+			JMenuItem menuItemAdd = new JMenuItem("Add New Module");
+			JMenuItem menuItemEdit = new JMenuItem("Edit Module");
+			
+			menuItemAdd.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent event) {
+					addModule();
+				}
+			});
+			
+			popupMenu.add(menuItemAdd);
+			popupMenu.add(menuItemEdit);
+			
+			lineElementTable.setComponentPopupMenu(popupMenu);
+			lineElementTable.addMouseListener(new TableMouseListener(lineElementTable));
 			
 			for (ModuleClass module: programme.getModules()){
 				if (module.getOptionalGroup().equals(group.getOptionalGroup())) {
