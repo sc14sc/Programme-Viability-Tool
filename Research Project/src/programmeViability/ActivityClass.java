@@ -14,6 +14,7 @@ public class ActivityClass {
 	private float length;
 	private String subjectCode;
 	private String courseNumber;
+	private String semester;
 	private int startTime = 99;
 	private int day = 99;
 	
@@ -50,12 +51,13 @@ public class ActivityClass {
 	}
 
 	public ActivityClass(int index, String description, float length, String subjectCode,
-			String courseNumber) {
+			String courseNumber, String semester) {
 		this.index = index;
 		this.description = description;
 		this.length = length;
 		this.subjectCode = subjectCode;
 		this.courseNumber = courseNumber;
+		this.semester = semester;
 	}
 
 	/**
@@ -96,6 +98,14 @@ public class ActivityClass {
 	 */
 	public String getCourseNumber() {
 		return courseNumber;
+	}
+
+	public String getSemester() {
+		return semester;
+	}
+
+	public void setSemester(String semester) {
+		this.semester = semester;
 	}
 
 }

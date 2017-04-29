@@ -1,15 +1,5 @@
 package programmeViability;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -35,24 +25,33 @@ public class TimeTable {
 				"13:00 - 14:00",
 				"14:00 - 15:00",
 				"15:00 - 16:00",
-				"16:00 - 17:00"};
+				"16:00 - 17:00",
+				"17:00 - 18:00"};
 
 		Object[][] data = {
-			    {"Monday"   , " "," "," "," "," "," "," "," "},
-			    {"Tuesday"  , " "," "," "," "," "," "," "," "},
-			    {"Wednesday", " "," "," "," "," "," "," "," "},
-			    {"Thursday",  " "," "," "," "," "," "," "," "},
-			    {"Friday",    " "," "," "," "," "," "," "," "},
+			    {"Monday"   , " "," "," "," "," "," "," "," "," "},
+			    {"Tuesday"  , " "," "," "," "," "," "," "," "," "},
+			    {"Wednesday", " "," "," "," "," "},
+			    {"Thursday",  " "," "," "," "," "," "," "," "," "},
+			    {"Friday",    " "," "," "," "," "," "," "," "," "},
 			};
-
+		int actLength = 0;
+		
 		for (ActivityClass activity : programme.getActivities()) {
-			System.out.println(activity.getSubjectCode() + activity.getCourseNumber());
-			ModuleClass mod = programme.getModule(activity.getSubjectCode() + activity.getCourseNumber());
+			//System.out.println(activity.getSubjectCode() + activity.getCourseNumber());
+			ModuleClass mod = programme.getModule(activity.getSubjectCode() + activity.getCourseNumber() + activity.getSemester());
 			
 			if (activity.getDay() != 99) {
 				if (mod.getSemester().equals(semester) || mod.getSemester().equals("3")) {
-					data[activity.getDay()][activity.getStartTime()] += activity.getSubjectCode()
-							 + activity.getCourseNumber() + " " + activity.getDescription() + "\n";
+					actLength = (int) Math.ceil(activity.getLength());
+					//System.out.println(activity.getSubjectCode()+activity.getCourseNumber() + " " + 
+					//			activity.getDescription()+" "+activity.getDay()+" "+activity.getStartTime()+" "+actLength);
+					for (int i = 0; i < actLength; i++) {
+						data[activity.getDay()][activity.getStartTime()+i] += activity.getSubjectCode()
+								 + activity.getCourseNumber() + " " + activity.getDescription() + "\n";						
+					}
+					//data[activity.getDay()][activity.getStartTime()] += activity.getSubjectCode()
+					//					 + activity.getCourseNumber() + " " + activity.getDescription() + "\n";
 				}				
 			}
 		}
@@ -79,5 +78,98 @@ public class TimeTable {
 		
 		return timetablePane;
 	}
+	
+	public void timeTableActivities() {
+		for (ActivityClass act : programme.getActivities()) {
+			act.setDay(99);
+			act.setStartTime(99);
+			programme.updateActivity(act);
+		}
+		
+		for (ActivityClass act : programme.getActivities()) {
+			int[] timeSlot = findFreeTimeSlot(act);
+			act.setDay(timeSlot[0]);
+			act.setStartTime(timeSlot[1]);
+            programme.updateActivity(act);
+		}
+	}
+	
+	private int[] findFreeTimeSlot(ActivityClass act) {
+		int[] timeSlot = new int[2];
+		
+		outerloop:
+        for (int day = 0; day < 5; day++) {
+        	if (day == 2) {
+        		for (int time = 1; time < 6; time++) {
+        			timeSlot[0] = day;
+        			timeSlot[1] = time;
+        			if (checkTimeSlot(timeSlot, act)) {
+        				break outerloop;
+        			}
+        		}
+        	} else {
+        		for (int time = 1; time < 10; time++) {
+           			timeSlot[0] = day;
+        			timeSlot[1] = time;
+        			if (checkTimeSlot(timeSlot, act)) {
+        				break outerloop;
+        			}
+        		}
+        	}
+        }
+        
+		return timeSlot;
+	}
+	
+	private boolean checkTimeSlot(int[] timeSlot, ActivityClass activity) {
+		boolean freeSlot = true;
+		int activityLength = (int) Math.ceil(activity.getLength());
+		//System.out.println("Activity: " + activity.getCourseNumber()+activity.getSubjectCode()+" "+activity.getSemester()+" "+activity.getDescription());
+		ModuleClass module = programme.getModule(activity.getSubjectCode()+activity.getCourseNumber()+activity.getSemester());
+		GroupClass group = programme.getGroup(module.getType() + module.getOptionalGroup());
+		
+		for (ActivityClass act : programme.getActivities()) {
+			ModuleClass mdl = programme.getModule(act.getSubjectCode()+act.getCourseNumber()+act.getSemester());
+			boolean check = true;
+			if (group.getType().equals(mdl.getType())) {
+				if (group.getExGroup().contains(mdl.getOptionalGroup())) {
+					check = false;
+				}					
+			}
+			
+			if (act.getSemester().equals(activity.getSemester()) || 
+					activity.getSemester().equals("3") ||
+					act.getSemester().equals("3")) {
+			} else {
+				check = false;
+			}
+			
+			if (check) {
+				if (act.getDay() == timeSlot[0]) {
+					int actLength = (int) Math.ceil(act.getLength());
+					for (int i = 0; i < activityLength; i++) {
+						for (int j = 0; j < actLength; j++) {
+							if ((act.getStartTime()+j) == (timeSlot[1] + i)) {
+								freeSlot = false;
+							}
+						}
+						if (timeSlot[0] == 2) {
+							if ((timeSlot[1] + i) > 5) {
+								freeSlot = false;
+							}
+								
+						} else {
+							if ((timeSlot[1] + i) > 9) {
+								freeSlot = false;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return freeSlot;
+	}
+
 
 }

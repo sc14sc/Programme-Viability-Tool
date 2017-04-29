@@ -2,10 +2,8 @@ package programmeViability;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -27,17 +25,14 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 public class SelectProgDB extends JDialog {
 	//https://www.tutorialspoint.com/swing/swing_jlist.htm	
@@ -92,6 +87,10 @@ public class SelectProgDB extends JDialog {
 		} catch (SQLException ex) {
 			while (ex != null) {
 				System.out.println("SQL Exception: " + ex.getMessage());
+				JOptionPane.showMessageDialog(null,
+						"SQL Exception: " + ex.getMessage(),
+						"ERROR",
+						JOptionPane.ERROR_MESSAGE);
 				ex = ex.getNextException();
 			}
 		} catch (Exception ex) {
