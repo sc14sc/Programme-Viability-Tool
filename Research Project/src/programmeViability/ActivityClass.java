@@ -9,6 +9,7 @@ package programmeViability;
  */
 public class ActivityClass {
 	
+	private int index;
 	private String description;
 	private float length;
 	private String subjectCode;
@@ -21,6 +22,10 @@ public class ActivityClass {
 	 */
 	public int getStartTime() {
 		return startTime;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 
 	/**
@@ -44,8 +49,9 @@ public class ActivityClass {
 		this.day = day;
 	}
 
-	public ActivityClass(String description, float length, String subjectCode,
+	public ActivityClass(int index, String description, float length, String subjectCode,
 			String courseNumber) {
+		this.index = index;
 		this.description = description;
 		this.length = length;
 		this.subjectCode = subjectCode;
@@ -64,6 +70,18 @@ public class ActivityClass {
 	 */
 	public float getLength() {
 		return length;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setLength(float length) {
+		this.length = length;
 	}
 
 	/**

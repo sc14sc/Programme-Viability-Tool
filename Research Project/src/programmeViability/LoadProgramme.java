@@ -1,13 +1,7 @@
-/**
- * 
- */
 package programmeViability;
 
-import java.awt.Dialog.ModalityType;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,138 +9,33 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
-/**
- * @author Sitong Chen
- *
- */
 public class LoadProgramme {
-
-	/**
-	 * @param args
-	 */
-	JPanel midPanel = new JPanel();
-	ProgrammeClass programme = null;
-	JLabel programmeLabel = new JLabel("Please Load File");
-	JFrame screen1 = new JFrame("Programme Viability Tool");
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		LoadProgramme loadProgramme = new LoadProgramme();
-
-	}
+	private String url = "jdbc:ucanaccess://Resource/ProgrammeCatalog.accdb";
+	
 	public LoadProgramme() {
 		
-		JPanel basic = new JPanel();
-		basic.setMaximumSize(basic.getPreferredSize());
-		basic.setLayout(new BoxLayout(basic, BoxLayout.Y_AXIS));
-		screen1.add(basic);
-		
-		JPanel topPanel = new JPanel();
-		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-		JPanel titlePanel = new JPanel();
-		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.X_AXIS));
-		midPanel.add(Box.createVerticalStrut(480));
-		JPanel botPanel = new JPanel();
-		botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.X_AXIS));
-		
-		JButton loadFileButton = new JButton("Load File");
-		loadFileButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				loadFile();
-				displayProgramme();
-			}
-
-		});
-		JButton addModuleButton = new JButton("Add Module");
-		
-		addModuleButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				addModule();
-			}
-
-		});
-		
-		JButton validateButton = new JButton("Validate");
-		validateButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				validate();
-			}
-		});
-		
-		JButton timeTableButton = new JButton("Timetable");
-		timeTableButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				displayTimeTable();
-			}
-		});
-		
-		JButton exitButton = new JButton("Exit");
-		exitButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				System.exit(1);
-			}
-		});
-		
-		//listModel.addElement("Please Load A file");
-		
-		programmeLabel.setHorizontalAlignment(JLabel.LEFT);
-		programmeLabel.setFont(new Font("Serif", Font.BOLD, 24));
-		
-		titlePanel.add(programmeLabel);
-		titlePanel.add(Box.createRigidArea(new Dimension(20,0)));
-		topPanel.add(titlePanel);
-		topPanel.add(buttonPanel);
-		buttonPanel.add(loadFileButton);
-		buttonPanel.add(Box.createRigidArea(new Dimension(500,0)));
-		buttonPanel.add(addModuleButton);
-		botPanel.add(validateButton);
-		botPanel.add(timeTableButton);
-		botPanel.add(Box.createRigidArea(new Dimension(500,0)));
-		botPanel.add(exitButton);
-		
-		basic.add(topPanel);
-		basic.add(midPanel);
-		basic.add(botPanel);
-		
-		screen1.setSize(1250, 720);
-		screen1.setLocationRelativeTo(null);
-		screen1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		screen1.setVisible(true);
 	}
-	protected void loadFile() {
-		// TODO Auto-generated method stub
-		
+	
+	public ProgrammeClass loadFile() {
 		ProgrammeClass prog = null;
 		GroupClass group = null;
 		ModuleClass module = null;
 		ActivityClass activity = null;
+		
 		JFileChooser fileChooser = new JFileChooser();
 		int returnValue = fileChooser.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -156,213 +45,285 @@ public class LoadProgramme {
 					InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
 					BufferedReader br = new BufferedReader(isr);
 					) {
-				
+
 				String line = br.readLine();
 	            while ((line = br.readLine()) != null) {
-	            	
+
+	            	try {
+
+	            	//System.out.println(line);
+
 	            	group = null;
 	            	module = null;
 	            	activity = null;
-	            	
+
 	                // use comma as separator
 	                String[] lineElement = line.split(",");
-	                
+	                //System.out.println("Split line");
+	                for (int i = 0; i < lineElement.length; i++) {
+	                	if (lineElement[i].equals("#Error")) {
+	                		if (i == 14 || i == 19 ) {
+	                			lineElement[i] = "0";
+	                		} else {
+		                   	 	lineElement[i] = "";
+	                		}
+	                	}
+	                }
+	                //System.out.println("Cleaned line : ");
+                	//for (int i = 0; i < lineElement.length; i++){
+                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+                	//}
+
 	                if (prog == null) {
 	                	prog = new ProgrammeClass(lineElement[0], lineElement[1], lineElement[2]);
-	                	/*for (int i = 0; i < lineElement.length; i++){
-	                		System.out.println("lineElement " + i + " " + lineElement[i]);
-	                	}*/
+	                	//for (int i = 0; i < lineElement.length; i++){
+	                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+	                	//}
 	                }
+	                
 	                for (GroupClass grp: prog.getGroups()) {
-	                	if (grp.getOptionalGroup().equals(lineElement[6])){
+	                	if (grp.getOptionalGroup().equals(lineElement[6]) &&
+	                			grp.getType().equals(lineElement[3])){
 	                		group = grp;
 	                	}
 	                }
 	                if (group == null) {
-	                	group = new GroupClass(lineElement[3], lineElement[4], lineElement[5], 
+	                	//for (int i = 3; i < 9; i++){
+	                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+	                	//}
+	                	group = new GroupClass(lineElement[3], lineElement[4], lineElement[5],
 	                			lineElement[6], lineElement[7], lineElement[8]);
 	                	prog.getGroups().add(group);
+	                	//System.out.println("New Group: " + lineElement[3] + lineElement[6]);
 	                }
-	                for (ModuleClass mdl: prog.getModules()) {
-	                	if (mdl.getSubjCode().equals(lineElement[9]) &&
-	                			mdl.getCrseNumb().equals(lineElement[10])) {
-	                		module = mdl;
-	                	}
-	                }
-	                if (module == null) {
-	                	module = new ModuleClass(lineElement[11], lineElement[9],
-	                			 lineElement[10], lineElement[6], lineElement[17], Float.valueOf(lineElement[19]));
-	                	prog.getModules().add(module);
-	                }
-	                activity = new ActivityClass(lineElement[13],
-	                		Float.valueOf(lineElement[14]), module.getSubjCode(), module.getCrseNumb());
 	                
-	                prog.getActivities().add(activity);
-	                
-	                module.setHoursPerWeek(module.getHoursPerWeek() + activity.getLength());
-	                prog.updateModule(module);
-	                
+	                if (lineElement[9].equals("")) {
+					} else {
+						for (ModuleClass mdl: prog.getModules()) {
+							if (mdl.getSubjCode().equals(lineElement[9]) &&
+									mdl.getCrseNumb().equals(lineElement[10])) {
+								module = mdl;
+							}
+						}
+						if (module == null) {
+							if (lineElement[18].equals("1 2")) {
+								lineElement[17] = "3";
+							}
+		                	//for (int i = 9; i < 20; i++){
+		                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+		                	//}
+							module = new ModuleClass(lineElement[11], lineElement[9],
+									 lineElement[10], lineElement[3], lineElement[6], lineElement[17], Float.valueOf(lineElement[19]));
+							prog.getModules().add(module);
+		                	//System.out.println("New Module: " + lineElement[9] + lineElement[10]);
+
+						}
+						if (lineElement[13].equals("")) {
+						} else {
+		                	//System.out.println("New Activity: " + lineElement[13] + lineElement[14]);
+							int index = 0;
+							for (ActivityClass act : prog.getActivities()) {
+								if (act.getSubjectCode().equals(module.getSubjCode()) &&
+										act.getCourseNumber().equals(module.getCrseNumb())) {
+									index++;
+								}
+							}
+							activity = new ActivityClass(index, lineElement[13],
+									Float.valueOf(lineElement[14]), module.getSubjCode(), module.getCrseNumb());
+
+								prog.getActivities().add(activity);
+
+								module.setHoursPerWeek(module.getHoursPerWeek() + activity.getLength());
+								prog.updateModule(module);
+			                	//System.out.println("New Activity: " + lineElement[13]);
+
+						}
+					}
 	                //System.out.println("Module code = " + lineElement[5] + lineElement[6]);
 
-	                programmeLabel.setText(prog.getProgCode() + " " + prog.getProgShortTitle() + " Year " + prog.getYear());
 	        		//listModel.addElement(mod);
-	         
+	            	} catch (Exception e) {
+	            		System.out.println("ERROR"  + line);
+	    				JOptionPane.showMessageDialog(null,
+	    						"Problem with line: " + line,
+	    						"ERROR",
+	    						JOptionPane.ERROR_MESSAGE);
+	            	}
+
 	            }
-	            	            
+
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
+        		System.out.println("ERROR "  + "FileNotFoundException");
+				JOptionPane.showMessageDialog(null,
+						"FileNotFoundException",
+						"ERROR",
+						JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
+	       		System.out.println("ERROR "  + "IOException");
+				JOptionPane.showMessageDialog(null,
+						"IOException",
+						"ERROR",
+						JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 			}
 		}
-		programme = prog;
+		
+		return prog;
 	}
-	
-	public void displayProgramme() {
-		
-		midPanel.removeAll();
-		String header [] = new String[] {
-				"Module",
-				"Module Title",
-				"Sem",
-				"Credits",
-				"Hours"};
-						
-		for (GroupClass group: programme.getGroups()){
-			
-			DefaultTableModel tableModel = new DefaultTableModel(0, 0);	
-			JTable lineElementTable = new JTable();
-			JScrollPane lineElementList = new JScrollPane(lineElementTable);
-			
-			JPanel groupPanel = new JPanel();
-			groupPanel.setLayout(new BoxLayout(groupPanel, BoxLayout.Y_AXIS));
-			JLabel groupLabel = new JLabel(group.getType() + " " + group.getOptionalGroup());
-			groupLabel.setHorizontalAlignment(JLabel.CENTER);
-			groupLabel.setFont(new Font("Serif", Font.BOLD, 16));
-			tableModel.setColumnIdentifiers(header);
-			//lineElementTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-			lineElementTable.setModel(tableModel);
-			lineElementTable.getColumnModel().getColumn(0).setMaxWidth(80);
-			lineElementTable.getColumnModel().getColumn(2).setMaxWidth(35);
-			lineElementTable.getColumnModel().getColumn(3).setMaxWidth(45);
-			lineElementTable.getColumnModel().getColumn(4).setMaxWidth(40);
-			groupPanel.add(groupLabel);
-			groupPanel.add(lineElementList);
-			midPanel.add(groupPanel);
-			tableModel.setRowCount(0);
-			
-			JPopupMenu popupMenu = new JPopupMenu();
-			JMenuItem menuItemAdd = new JMenuItem("Add New Module");
-			JMenuItem menuItemEdit = new JMenuItem("Edit Module");
-			
-			menuItemAdd.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent event) {
-					addModule();
-				}
-			});
-			
-			popupMenu.add(menuItemAdd);
-			popupMenu.add(menuItemEdit);
-			
-			lineElementTable.setComponentPopupMenu(popupMenu);
-			lineElementTable.addMouseListener(new TableMouseListener(lineElementTable));
-			
-			for (ModuleClass module: programme.getModules()){
-				if (module.getOptionalGroup().equals(group.getOptionalGroup())) {
-					tableModel.addRow(new Object[] {module.getSubjCode() + module.getCrseNumb(), module.getTitle(),
-							module.getSemester(), module.getCredits(), module.getHoursPerWeek()});
-				}
-			}
-		}
-	}
-	
-	public void addModule() {
-		JDialog addModuleDialog = new JDialog(screen1);
-		
-		addModuleDialog.setTitle("Add Module");
-		addModuleDialog.setModalityType(ModalityType.APPLICATION_MODAL);
-		addModuleDialog.setSize(500, 300);
-		addModuleDialog.setLocationRelativeTo(screen1);
-		addModuleDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		addModuleDialog.setVisible(true);
-	}
-	
-	public void displayTimeTable() {
-		JDialog addTimeTableDialog = new JDialog();
-		
-		JPanel basic = new JPanel();
-		basic.setMaximumSize(basic.getPreferredSize());
-		basic.setLayout(new BoxLayout(basic, BoxLayout.Y_AXIS));
-		addTimeTableDialog.add(basic);
-		
-		JPanel topPanel = new JPanel();
-		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-		JPanel titlePanel = new JPanel();
-		titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-		JPanel middlePanel = new JPanel();
-		middlePanel.setLayout(new BoxLayout(middlePanel, BoxLayout.X_AXIS));
-		JPanel botPanel = new JPanel();
-		botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.X_AXIS));
-		
-		JLabel timeTableLabel = new JLabel(programme.getProgCode() + " " + programme.getProgShortTitle() + " Year " + programme.getYear());
-		timeTableLabel.setHorizontalAlignment(JLabel.LEFT);
-		timeTableLabel.setFont(new Font("Serif", Font.BOLD, 24));
-		
-		titlePanel.add(timeTableLabel);
-		titlePanel.add(Box.createRigidArea(new Dimension(20,0)));
-		
-		JButton backButton = new JButton("Back");
-		backButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event){
-				addTimeTableDialog.dispose();
-			}
-		});
-		
-		topPanel.add(titlePanel);
-		
-		//https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#simple
-		TimeTable timetablePane = new TimeTable(programme);
-        
-		middlePanel.add(timetablePane.createTimeTable("1"));
-		middlePanel.add(timetablePane.createTimeTable("2"));
 
-		botPanel.add(backButton);
+	public ProgrammeClass loadAccess(String[] progCode) {
+	//http://www.javacodehelp.com/java-tutorial/DatabaseExamples.html
+	//https://sourceforge.net/projects/ucanaccess/
+	//http://stackoverflow.com/questions/21955256/manipulating-an-access-database-from-java-without-odbc
 		
-		basic.add(topPanel);
-		basic.add(middlePanel);
-		basic.add(botPanel);
+		String[] lineElement;
+		lineElement = new String[20];
 		
-		addTimeTableDialog.setTitle("Timetable");
-		addTimeTableDialog.setModalityType(ModalityType.APPLICATION_MODAL);
-		addTimeTableDialog.setSize(1250, 720);
-		addTimeTableDialog.setLocationRelativeTo(screen1);
-		addTimeTableDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		addTimeTableDialog.setVisible(true);
-	}
-	
-	public void validate() {
-		int time = 1;
-		int day = 0;
-		for (ActivityClass activity: programme.getActivities()) {
-			activity.setDay(day);
-			activity.setStartTime(time);
-			programme.updateActivity(activity);
-			time++;
-			if (time > 8) {
-				day++;
-				time = 1;
+		ProgrammeClass prog = null;
+		GroupClass group = null;
+		ModuleClass module = null;
+		ActivityClass activity = null;
+
+		//String prog_code = "BSC-NAT/SC";
+		String year = "3";
+		String queryProgs = "SELECT DISTINCT SWRPCAT_PROG_CODE, SWRPCAT_PROG_SHORT_TITLE, SWRPCMG_YEAR, SWRPCMG_TYPE, SWRPCMG_MIN_CREDITS, "
+				+ "SWRPCMG_MAX_CREDITS,SWRPCOG_OPTIONAL_GROUP,SWRPCOG_MIN_CREDITS,SWRPCOG_MAX_CREDITS,SWRPCMD_SUBJ_CODE,SWRPCMD_CRSE_NUMB, "
+				+ "SWRMCAT_TITLE,SWRTMDS_DLVT_CODE,SWVDLVT_DESC,SWRTMDS_LENGTH_HRS,SWRTMDS_NUMBER_OF_DLVT,SWRTMDS_STUDENT_HRS,SWRMCAT_SEMESTER, "
+				+ "SWRMCAT_MULTI_SECTIONS,SWRMCAT_CREDITS "
+				+ "FROM PROGRAM LEFT JOIN [MODULE] "
+				+ "ON (MODULE.SWRMCAT_SUBJ = PROGRAM.SWRPCMD_SUBJ_CODE "
+				+ "AND MODULE.SWRMCAT_CRSE_NUMB = PROGRAM.SWRPCMD_CRSE_NUMB) "
+				+ "WHERE SWRPCAT_PROG_CODE = ? "
+				+ "AND SWRPCMG_YEAR = ? "
+				+ "ORDER BY SWRPCOG_OPTIONAL_GROUP, SWRPCMD_SUBJ_CODE, SWRPCMD_CRSE_NUMB";
+		PreparedStatement getProgDtls = null;
+		
+ 		
+		try {
+			Connection conn = DriverManager.getConnection(url,"","");
+			conn.setAutoCommit(false);
+			getProgDtls = conn.prepareStatement(queryProgs);
+			getProgDtls.setString(1, progCode[0]);
+			getProgDtls.setString(2, progCode[1]);
+			
+			ResultSet rs = getProgDtls.executeQuery();  
+			while (rs.next()) {
+				for (int i = 0; i < lineElement.length; i++ ) {
+					lineElement[i] = "";
+				}
+				for (int i = 0; i < lineElement.length; i++ ) {
+					lineElement[i] = rs.getString(i + 1);
+				}
+                for (int i = 0; i < lineElement.length; i++) {
+                	if (lineElement[i] == null) {
+                		if (i == 14 || i == 19 ) {
+                			lineElement[i] = "0";
+                		} else {
+	                   	 	lineElement[i] = "";
+                		}
+                	}
+                }
+            	//for (int i = 0; i < lineElement.length; i++){
+            	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+            	//}
+            	
+            	group = null;
+            	module = null;
+            	activity = null;
+            	
+                if (prog == null) {
+                	prog = new ProgrammeClass(lineElement[0], lineElement[1], lineElement[2]);
+                	//for (int i = 0; i < lineElement.length; i++){
+                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+                	//}
+                }
+               
+                for (GroupClass grp: prog.getGroups()) {
+                	if (grp.getOptionalGroup().equals(lineElement[6]) &&
+                			grp.getType().equals(lineElement[3])){
+                		group = grp;
+                	}
+                }
+                if (group == null) {
+                	//for (int i = 3; i < 9; i++){
+                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+                	//}
+                	group = new GroupClass(lineElement[3], lineElement[4], lineElement[5],
+                			lineElement[6], lineElement[7], lineElement[8]);
+                	prog.getGroups().add(group);
+                	//System.out.println("New Group: " + lineElement[3] + lineElement[6]);
+                }
+               
+                if (lineElement[9].equals("")) {
+				} else {
+					for (ModuleClass mdl: prog.getModules()) {
+						if (mdl.getSubjCode().equals(lineElement[9]) &&
+								mdl.getCrseNumb().equals(lineElement[10])) {
+							module = mdl;
+						}
+					}
+					if (module == null) {
+						if (lineElement[18].equals("1 2")) {
+							lineElement[17] = "3";
+						}
+	                	//for (int i = 9; i < 20; i++){
+	                	//	System.out.println("lineElement " + i + " " + lineElement[i]);
+	                	//}
+						module = new ModuleClass(lineElement[11], lineElement[9],
+								 lineElement[10], lineElement[3], lineElement[6], lineElement[17], Float.valueOf(lineElement[19]));
+						prog.getModules().add(module);
+	                	//System.out.println("New Module: " + lineElement[9] + lineElement[10]);
+
+					}
+					if (lineElement[13].equals("")) {
+					} else {
+	                	//System.out.println("New Activity: " + lineElement[13] + lineElement[14]);
+						int index = 0;
+						for (ActivityClass act : prog.getActivities()) {
+							if (act.getSubjectCode().equals(module.getSubjCode()) &&
+									act.getCourseNumber().equals(module.getCrseNumb())) {
+								index++;
+							}
+						}
+						activity = new ActivityClass(index, lineElement[13],
+								Float.valueOf(lineElement[14]), module.getSubjCode(), module.getCrseNumb());
+
+							prog.getActivities().add(activity);
+
+							module.setHoursPerWeek(module.getHoursPerWeek() + activity.getLength());
+							prog.updateModule(module);
+		                	//System.out.println("New Activity: " + lineElement[13]);
+
+					}
+                }
 			}
-			if (day > 4) {
-				time = 1;
-				day = 0;
+			
+		} catch (SQLException ex) {
+			while (ex != null) {
+				System.out.println("SQL Exception: " + ex.getMessage());
+				ex = ex.getNextException();
 			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
+		return prog;
 	}
 	
+	public void saveDB(ProgrammeClass prog) {
+		String updateProgs = "SELECT DISTINCT SWRPCAT_PROG_CODE, SWRPCAT_PROG_SHORT_TITLE, SWRPCMG_YEAR, SWRPCMG_TYPE, SWRPCMG_MIN_CREDITS, "
+				+ "SWRPCMG_MAX_CREDITS,SWRPCOG_OPTIONAL_GROUP,SWRPCOG_MIN_CREDITS,SWRPCOG_MAX_CREDITS,SWRPCMD_SUBJ_CODE,SWRPCMD_CRSE_NUMB, "
+				+ "SWRMCAT_TITLE,SWRTMDS_DLVT_CODE,SWVDLVT_DESC,SWRTMDS_LENGTH_HRS,SWRTMDS_NUMBER_OF_DLVT,SWRTMDS_STUDENT_HRS,SWRMCAT_SEMESTER, "
+				+ "SWRMCAT_MULTI_SECTIONS,SWRMCAT_CREDITS "
+				+ "FROM PROGRAM LEFT JOIN [MODULE] "
+				+ "ON (MODULE.SWRMCAT_SUBJ = PROGRAM.SWRPCMD_SUBJ_CODE "
+				+ "AND MODULE.SWRMCAT_CRSE_NUMB = PROGRAM.SWRPCMD_CRSE_NUMB) "
+				+ "WHERE SWRPCAT_PROG_CODE = ? "
+				+ "AND SWRPCMG_YEAR = ? "
+				+ "ORDER BY SWRPCOG_OPTIONAL_GROUP, SWRPCMD_SUBJ_CODE, SWRPCMD_CRSE_NUMB";
+		PreparedStatement updProgDtls = null;
+		
+	}
 }

@@ -83,25 +83,58 @@ public class ProgrammeClass {
 		return year;
 	}
 	
-	public void updateModule(ModuleClass module) {
+	public ModuleClass getModule(String module) {
+		ModuleClass mod = null;
 		for (int i = 0; i < modules.size(); i++) {
-			if (module.getSubjCode().equals(modules.get(i).getSubjCode()) &&
-					module.getCrseNumb().equals(modules.get(i).getCrseNumb())) {
-				modules.set(i, module);
+			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb())) {
+				mod = modules.get(i);
+			}
+		}
+		return mod;
+	}
+	
+	public ActivityClass getActivity(String module, int index) {
+		ActivityClass act = null;
+		for (int i = 0; i < activities.size(); i++) {
+			if (module.equals(activities.get(i).getSubjectCode() + activities.get(i).getCourseNumber()) &&
+					index == activities.get(i).getIndex()) {
+				act = activities.get(i);
+			}
+		}
+		return act;
+	}
+	
+	public void deleteModule(String module) {
+		for (int i = 0; i < modules.size(); i++) {
+			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb())) {
+				for (int j = activities.size() -1 ; j > -1; j--) {
+					if (activities.get(j).getSubjectCode().equals(modules.get(i).getSubjCode()) &&
+							activities.get(j).getCourseNumber().equals(modules.get(i).getCrseNumb())) {
+						System.out.println(activities.get(j).getSubjectCode()+activities.get(j).getCourseNumber()+activities.get(j).getDescription() );
+						activities.remove(j);
+					}
+				}
+				modules.remove(i);
 			}
 		}
 	}
 	
-	public ModuleClass getModule(String subjectCode, String courseNumber) {
-		
-		ModuleClass module = null;
-		for (int i = 0; i < modules.size(); i++) {
-			if (modules.get(i).getSubjCode().equals(subjectCode) &&
-					modules.get(i).getCrseNumb().equals(courseNumber)) {
-				module = modules.get(i);
+	public void deleteGroup(String[] grp) {
+		for (int i = 0; i < groups.size(); i++) {
+			if (groups.get(i).getType().equals(grp[0]) && groups.get(i).getOptionalGroup().equals(grp[1])) {
+				groups.remove(i);
 			}
 		}
-		return module;
+	}
+	
+	public void updateModule(ModuleClass module) {
+		for (int i = 0; i < modules.size(); i++) {
+			if (module.getSubjCode().equals(modules.get(i).getSubjCode()) &&
+					module.getCrseNumb().equals(modules.get(i).getCrseNumb()) &&
+					module.getSemester().equals(modules.get(i).getSemester())) {
+				modules.set(i, module);
+			}
+		}
 	}
 	
 	public void updateActivity(ActivityClass activity) {
@@ -113,5 +146,20 @@ public class ProgrammeClass {
 			}
 		}
 	}
+	
+	public Float deleteActivity(int index, String activity, ModuleClass mod) {
+		Float hrs = mod.getHoursPerWeek();
+		for (int i = 0; i < activities.size(); i++) {
+			if (activities.get(i).getSubjectCode().equals(mod.getSubjCode()) &&
+					activities.get(i).getCourseNumber().equals(mod.getCrseNumb()) &&
+					activities.get(i).getDescription().equals(activity) &&
+					activities.get(i).getIndex() == index) {
+				hrs -= activities.get(i).getLength();
+				activities.remove(i);
+			}
+		}
+		return hrs;
+	}
+	
 
 }
