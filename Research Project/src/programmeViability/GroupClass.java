@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
+ * Holds Type and Group level information. 
+ * 
  * @author Sitong Chen
  *
  */
@@ -21,6 +23,14 @@ public class GroupClass {
 	ArrayList<String> exGroup = new ArrayList<String>();
 	//private String[] exGroup = {""};
 	
+	/**
+	 * @param type
+	 * @param typeMinCredits
+	 * @param typeMaxCredits
+	 * @param optionalGroup
+	 * @param groupMinCredits
+	 * @param groupMaxCredits
+	 */
 	public GroupClass (String type, String typeMinCredits, String typeMaxCredits,
 			String optionalGroup, String groupMinCredits, String groupMaxCredits) {
 		this.type = type;
@@ -53,6 +63,20 @@ public class GroupClass {
 	}
 
 	/**
+	 * @param typeMinCredits
+	 */
+	public void setTypeMinCredits(String typeMinCredits) {
+		this.typeMinCredits = typeMinCredits;
+	}
+
+	/**
+	 * @param typeMaxCredits
+	 */
+	public void setTypeMaxCredits(String typeMaxCredits) {
+		this.typeMaxCredits = typeMaxCredits;
+	}
+
+	/**
 	 * @return the optionalGroup
 	 */
 	public String getOptionalGroup() {
@@ -66,14 +90,6 @@ public class GroupClass {
 		return groupMinCredits;
 	}
 
-	public void setTypeMinCredits(String typeMinCredits) {
-		this.typeMinCredits = typeMinCredits;
-	}
-
-	public void setTypeMaxCredits(String typeMaxCredits) {
-		this.typeMaxCredits = typeMaxCredits;
-	}
-
 	/**
 	 * @return the groupMaxCredits
 	 */
@@ -81,10 +97,16 @@ public class GroupClass {
 		return groupMaxCredits;
 	}
 
+	/**
+	 * @return list of groups this group is mutually exclusive with
+	 */
 	public ArrayList<String> getExGroup() {
 		return exGroup;
 	}
 
+	/**
+	 * Adds a new group to the list of mutually exclusive groups, and sorts that list.
+	 */
 	public void updExGroup(String exGrp) {
 		ArrayList<String> cleanxGrps = new ArrayList<String>();
 		for (int i = 0; i < exGroup.size(); i++) {
@@ -99,6 +121,9 @@ public class GroupClass {
 		this.exGroup = cleanxGrps;
 	}
 	
+	/**
+	 * deletes a group from the list of mutually exclusive groups
+	 */
 	public void delExGroup(String exGrp) {
 		ArrayList<String> cleanxGrps = new ArrayList<String>();
 		//System.out.println("delExGroup: "+ exGroup.size());
@@ -116,6 +141,10 @@ public class GroupClass {
 		this.exGroup = cleanxGrps;
 	}
 	
+	/**
+	 * gets a comma separated list of mutually exclusive groups in a String, and stores that list as a
+	 * sorted ArrayList.
+	 */
 	public void setExGroup(String exGroup) {
 		ArrayList<String> cleanxGrps = new ArrayList<String>();
 		int commaCount = 0;

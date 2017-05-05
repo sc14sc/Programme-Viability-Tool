@@ -33,9 +33,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
+ * This is the controlling Class
+ * 
  * @author Sitong Chen
  *
  */
+
 public class ProgrammeViability {
 
     /**
@@ -48,8 +51,9 @@ public class ProgrammeViability {
 	JButton validateButton = new JButton("Validate");
 	JButton timeTableButton = new JButton("Timetable");
     JButton saveDBButton = new JButton("Save to Database");
+    JButton addProgButton = new JButton("Add Programme");
     JButton addGroupButton = new JButton("Add Group");
-    //JButton editGroupButton = new JButton("Edit Group");
+       //JButton editGroupButton = new JButton("Edit Group");
     JButton delGroupButton = new JButton("Delete Group");
     LoadProgramme loadProgramme = new LoadProgramme();
 
@@ -58,6 +62,17 @@ public class ProgrammeViability {
         ProgrammeViability programmeViability = new ProgrammeViability();
 
     }
+    
+    
+    /**
+     * Sets up main screen
+	 * 3 panels : Top, Middle, Button
+	 * Middle Panel set up with a ScrollPane, which will be filled with Group Data panels in displayProgramme method
+	 * Load Programme button calls:
+	 * 		SelectProgDB.getProgCode() - to choose a programme to load
+	 * 		sets up a ProgrammeClass instance with data by calling loadProgramme.loadAccess
+	 *      displays progamme calling displayProgramme()
+     */
     public ProgrammeViability() {
 
         JPanel basic = new JPanel();
@@ -99,6 +114,15 @@ public class ProgrammeViability {
             @Override
             public void actionPerformed(ActionEvent event){
             	loadProgramme.saveDB(programme);
+            }
+
+        });
+
+        addProgButton.setVisible(false);
+        addProgButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent event){
+                addProg();
             }
 
         });
@@ -164,6 +188,7 @@ public class ProgrammeViability {
         buttonPanel.add(loadDBButton);
         buttonPanel.add(saveDBButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(250,0)));
+        buttonPanel.add(addProgButton);
         buttonPanel.add(addGroupButton);
         //buttonPanel.add(editGroupButton);
         buttonPanel.add(delGroupButton);
@@ -185,6 +210,14 @@ public class ProgrammeViability {
         screen1.setVisible(true);
     }
 
+    /**
+     * Displays the programme data stored in the ProgrammeClass instance.
+     * Each Groups data has it's own panel stored in a scroll pane
+     * Each group has a JTable showing modules in the group
+     * Sets up a pop-up menu on module table to edit Group, add, delete or move modules
+     * Can edit Module Title, Semester and Credits from table (TableModelListener)
+     *
+     */
     public void displayProgramme() {
     	//http://zetcode.com/tutorials/javaswingtutorial/resizablecomponent/
 
@@ -369,6 +402,7 @@ public class ProgrammeViability {
             }
         }
         saveDBButton.setVisible(true);
+        addProgButton.setVisible(false);
         addGroupButton.setVisible(true);
         //editGroupButton.setVisible(true);
         delGroupButton.setVisible(true);
@@ -376,6 +410,128 @@ public class ProgrammeViability {
         screen1.repaint();
     }
 
+    /**
+     * Sets up Add Prog Dialog
+     * on pressing save:
+     * 		creates a new ProgrammeClass instance
+     * 		redisplays the programme - displayProgramme method
+     * 
+     */
+    public void addProg() {
+        final JDialog addProgDialog = new JDialog(screen1);
+
+        JPanel addProgPanel = new JPanel();
+        addProgPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // Type
+        JLabel progCodeLabel = new JLabel("Programme Code: ");
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0,10,0,0);
+        gbc.weightx = 1;
+        addProgPanel.add(progCodeLabel,gbc);
+
+        final JTextField progCodeText = new JTextField();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(5,0,0,10);
+        gbc.weightx = 1;
+        addProgPanel.add(progCodeText,gbc);
+
+        // Type Min Credits
+        JLabel progTitleLabel = new JLabel("Programme Title: ");
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0,10,0,0);
+        gbc.weightx = 1;
+        addProgPanel.add(progTitleLabel,gbc);
+
+        final JTextField progTitleText = new JTextField();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.insets = new Insets(5,0,0,10);
+        gbc.weightx = 1;
+        addProgPanel.add(progTitleText,gbc);
+
+        // Type Max Credits
+        JLabel yearLabel = new JLabel("Programme Year: ");
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.insets = new Insets(0,10,0,0);
+        gbc.weightx = 1;
+        addProgPanel.add(yearLabel,gbc);
+
+        final JTextField yearText = new JTextField();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.insets = new Insets(5,0,0,10);
+        gbc.weightx = 1;
+        addProgPanel.add(yearText,gbc);
+
+       // Buttons
+        JButton addBtn = new JButton("Add");
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        gbc.insets = new Insets(10,10,10,0);
+        gbc.weightx = 1;
+        addBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent event){
+                ProgrammeClass prog = new ProgrammeClass(progCodeText.getText().toUpperCase(), progTitleText.getText(),yearText.getText());
+                programme = prog;
+                addProgDialog.dispose();
+                displayProgramme();
+            }
+        });
+        addProgPanel.add(addBtn,gbc);
+
+        JButton cancelBtn = new JButton("Cancel");
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridwidth = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 7;
+        gbc.insets = new Insets(10,0,10,10);
+        gbc.weightx = 1;
+        cancelBtn.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent event){
+            	addProgDialog.dispose();
+            }
+        });
+        addProgPanel.add(cancelBtn,gbc);
+
+        addProgDialog.add(addProgPanel);
+        addProgDialog.setTitle("Add Programme");
+        addProgDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+        addProgDialog.pack();
+        addProgDialog.setLocationRelativeTo(screen1);
+        addProgDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        addProgDialog.setVisible(true);
+    }
+    /**
+     * Sets up Add Group Dialog
+     * on pressing save:
+     * 		Adds new group via ProgrammeClass.addGroup method 
+     * 		redisplays the programme - displayProgramme method
+     * 
+     */
     public void addGroup() {
         final JDialog addGroupDialog = new JDialog(screen1);
 
@@ -563,6 +719,15 @@ public class ProgrammeViability {
         addGroupDialog.setVisible(true);
     }
 
+    /**
+     * Sets up Edit Group Dialog
+     * on pressing save:
+     *      Removes group from any Mutually Exclusive lists in all groups
+     * 		Updates group via ProgrammeClass.updateGroup(group) method 
+     *      Sets group in appropriate Mutually Exclusive lists in all groups
+     * 		redisplays the programme - displayProgramme method
+     * 
+     */
     public void editGroup(JTable table, final GroupClass grp) {
         final JDialog editGroupDialog = new JDialog(screen1);
 
@@ -776,6 +941,14 @@ public class ProgrammeViability {
 
     }
 
+    /**
+     * Sets up Delete Group Dialog
+     * on pressing delete:
+     *      Checks no modules in group
+     * 		Deletes group via ProgrammeClass.deleteGroup(group) method 
+     * 		redisplays the programme - displayProgramme method
+     * 
+     */
     public void delGroup() {
         final JDialog delGroupDialog = new JDialog(screen1);
 
@@ -916,6 +1089,16 @@ public class ProgrammeViability {
         delGroupDialog.setVisible(true);
     }
 
+    /**
+     * This method is invoked from a pop-up menu in the module table
+     * Sets up Add Module dialog
+     * on pressing save
+     *      Adds the module to ProgrammeClass.getModules().add(module);
+     * 		adds the module to the JTable 
+     * 
+     * @param JTable and GroupClass the module is to be added to
+     * 
+     */
     public void addModule(final JTable table, final GroupClass grp) {
         final JDialog addModuleDialog = new JDialog(screen1);
 
@@ -1076,6 +1259,13 @@ public class ProgrammeViability {
         addModuleDialog.setVisible(true);
     }
 
+    /**
+     * This method is invoked from a pop-up menu in the module table
+     * Removes the highlighted module via ProgrammeClass.deleteModule;
+     * Re displays the ProgrammClass.
+     * 
+     * @param JTable the module is to be removed from
+     */
     public void delModule(JTable table) {
         programme.deleteModule(table.getValueAt(table.getSelectedRow(),0).toString());
         //DefaultTableModel dm = (DefaultTableModel) table.getModel();
@@ -1083,6 +1273,17 @@ public class ProgrammeViability {
         displayProgramme();
     }
 
+    /**
+     * This method is invoked from a pop-up menu in the module table
+     * Sets up the move Module Dialog
+     * On pressing save:
+     * 		Checks destination Group exists.
+     * 		Updates the module Type and Group
+     * 		Updates the module in ProgrammeClass
+     * 		Re-Displays the ProgrammeClass
+     * 
+     * @param JTable the module to be moved is currently in
+     */
     public void moveModule(JTable table) {
         final JDialog moveModuleDialog = new JDialog(screen1);
 
@@ -1192,6 +1393,14 @@ public class ProgrammeViability {
         moveModuleDialog.setVisible(true);
     }
 
+    /**
+     * This method is invoked from a pop-up menu in the module table
+     * Sets up the Activity Table in a new Dialog
+     * Sets up a pop-up menu on activity List to add or delete activities
+     * Can edit Activity Description and Length from table (TableModelListener)
+     * 
+     * @param table the module owning the activities is in
+     */
     public void displayActivities(final JTable table) {
         final JDialog dispActDialog = new JDialog(screen1);
 
@@ -1330,6 +1539,16 @@ public class ProgrammeViability {
         dispActDialog.setVisible(true);
     }
 
+    /**
+     * This method is invoked from a pop-up menu in the activity table
+     * Sets up the Add Activity Dialog
+     * On pressing Save:
+     * 		Adds the new Activity to the list of activities in ProgrammeClass
+     * 		Updates activity table to show new Activity
+     * 		Updates module with recalculated hours per week
+     * 
+     * @param module and table the activity id to be added to.
+     */
     public void addActivity(final ModuleClass mod, final JTable table) {
         final JDialog addActivityDialog = new JDialog(screen1);
 
@@ -1441,6 +1660,13 @@ public class ProgrammeViability {
         addActivityDialog.setVisible(true);
     }
 
+    /**
+     * Sets up the Display Timetable Dialog
+     * Two timetables, Semester 1 and Semester 2 are displayed 
+     * TimeTable.timeTableActivities() called to put activities into Day/time slot.
+     * Each Semester timetable display set up by calling TimeTable.createTimeTable
+     * 
+     */
     public void displayTimeTable() {
         final JDialog addTimeTableDialog = new JDialog();
 
@@ -1505,7 +1731,14 @@ public class ProgrammeViability {
         addTimeTableDialog.setVisible(true);
     }
 
-    public void validate() {
+    /**
+     * Validate the ProgrammeClass data
+     * Looks for Groups where not enough modules to choose min/max group credits
+     * Looks for modules with missing data need for timetabling
+     * Looks for Group Sets where Semester 1 or Semester 2 hours greater that 40.
+     * 
+     */
+     public void validate() {
     	final JDialog valDialog = new JDialog();
     	JPanel valPanel = new JPanel();
     	valPanel.setLayout(new BoxLayout(valPanel, BoxLayout.Y_AXIS));
@@ -1589,9 +1822,9 @@ public class ProgrammeViability {
     	}
 
     	report += "<p><b>Sets: </b><br>";
-    	programme.setGrpGrps(programme.createGrpGrps());
+    	programme.setGrpSets(programme.createGrpSets());
 
-    	for (ArrayList<String> set : programme.getGrpGrps()) {
+    	for (ArrayList<String> set : programme.getGrpSets()) {
     		//for (String y : set) {
     		//	report += y + " ";
     		//}

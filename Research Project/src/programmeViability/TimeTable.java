@@ -4,15 +4,28 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * This Class allocates times to activities in a ProgrammeClass, and sets up the display of the timetable
+ * 
+ * @author Sitong Chen
+ *
+ */
 public class TimeTable {
 	
 	private ProgrammeClass programme;
 
+	/**
+	 * @param programme
+	 */
 	public TimeTable(ProgrammeClass programme) {
 		// TODO Auto-generated constructor stub
 		this.programme = programme;
 	}
 	
+	/**
+	 * @param semester to be timetabled
+	 * @return JScrollPane with the display for a semesters timetable.
+	 */
 	public JScrollPane createTimeTable(String semester) {
 		//https://docs.oracle.com/javase/tutorial/uiswing/components/table.html#simple
 
@@ -79,6 +92,9 @@ public class TimeTable {
 		return timetablePane;
 	}
 	
+	/**
+	 * Goes through each activity in the programmeClass, and allocates day and start times for the activity
+	 */
 	public void timeTableActivities() {
 		for (ActivityClass act : programme.getActivities()) {
 			act.setDay(99);
@@ -94,6 +110,13 @@ public class TimeTable {
 		}
 	}
 	
+	/**
+	 * Goes through each day and start time, and tests whether it is free for the activity
+	 * Once a free time slot has been found for the search is terminated and the time slot is returned
+	 * 
+	 * @param activity to be allocated a time slot
+	 * @return two integers in an array specifying the day and start time
+	 */
 	private int[] findFreeTimeSlot(ActivityClass act) {
 		int[] timeSlot = new int[2];
 		
@@ -121,6 +144,17 @@ public class TimeTable {
 		return timeSlot;
 	}
 	
+	/**
+	 * This goes through every activity to see if the received timeslot is free to timetable the received activity.
+	 * Complications considered:
+	 * 		Are the activities in the same Semester
+	 * 		Length of the activities - one timeslot is one hour
+	 * 		Are the activities in groups mutually exclusive with each other
+	 * 
+	 * @param timeSlot to be checked
+	 * @param activity to be timetabled
+	 * @return boolean (free/not free)
+	 */
 	private boolean checkTimeSlot(int[] timeSlot, ActivityClass activity) {
 		boolean freeSlot = true;
 		int activityLength = (int) Math.ceil(activity.getLength());

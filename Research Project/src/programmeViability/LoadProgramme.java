@@ -17,6 +17,13 @@ import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+/**
+ * This gets data from the supplied source and sets up a ProgrammeClass instance with this data. 
+ * 
+ * @author Sitong Chen
+ *
+ */
+
 public class LoadProgramme {
 
 	private String url = "jdbc:ucanaccess://Resource/ProgrammeCatalog.accdb";
@@ -25,6 +32,12 @@ public class LoadProgramme {
 
 	}
 
+	/**
+	 * This reads a file in the specified format, and creates the ProgrammeClass Object from that file
+	 * ***OBSOLETE*** superseded by reading data from Microsoft Access database.
+	 * 
+	 * @return ProgrammeClass object
+	 */
 	public ProgrammeClass loadFile() {
 		ProgrammeClass prog = null;
 		GroupClass group = null;
@@ -169,6 +182,12 @@ public class LoadProgramme {
 		return prog;
 	}
 
+	/**
+	 * This reads data from Microsoft Access database, and creates the ProgrammeClass Object
+	 * This includes storing lists of all groups,modules and activities in the ProgrammeClass
+	 * 
+	 * @return ProgrammeClass object
+	 */
 	public ProgrammeClass loadAccess(String[] progCode) {
 	//http://www.javacodehelp.com/java-tutorial/DatabaseExamples.html
 	//https://sourceforge.net/projects/ucanaccess/
@@ -329,6 +348,12 @@ public class LoadProgramme {
 		return prog;
 	}
 
+	/**
+	 * Save ProgrammeClass to the Microsoft Database.
+	 * First put data into same format as Database, Program and Module
+	 * Save to database be deleting existing entries, then inserting new entries.
+	 * 
+	 */
 	public void saveDB(ProgrammeClass prog) {
 
 		ArrayList<ArrayList<String>> newProg = getProgData(prog);
@@ -338,6 +363,13 @@ public class LoadProgramme {
 
 	}
 
+	/**
+	 * We return an array to make inserting into the PROGRAM table easier. We try and preserve values in the
+	 * Access database but not stored in the ProgrammeClass
+	 * 
+	 * @param ProgrammeClass
+	 * @return Array of Array Strings in the format of the PROGRAM Access table
+	 */
 	private ArrayList<ArrayList<String>> getProgData(ProgrammeClass prog) {
 		ArrayList<ArrayList<String>> oldProg = new ArrayList<ArrayList<String>>();
 
@@ -480,6 +512,183 @@ public class LoadProgramme {
 
 	}
 
+	/**
+	 * We return an array to make inserting into the MODULE table easier. We try and preserve values in the
+	 * Access database but not stored in the ProgrammeClass
+	 * 
+	 * @param ProgrammeClass
+	 * @return Array of Array Strings in the format of the MODULE Access table
+	 */
+	private ArrayList<ArrayList<String>> getModData(ProgrammeClass prog) {
+		ArrayList<ArrayList<String>> newMod = new ArrayList<ArrayList<String>>();
+	
+		String queryModule = "SELECT MODULE.SWRMCAT_MODULE_ID, "	//  0
+				+ "MODULE.SWRMCAT_TITLE, "							//  1
+				+ "MODULE.SWRMCAT_SUBJ, "							//  2
+				+ "MODULE.SWRMCAT_CRSE_NUMB, "						//  3
+				+ "MODULE.SWRMCAT_PRE_REQ_MODULE, "					//  4
+				+ "MODULE.SWRMCAT_CO_REQ_MODULE, "					//  5
+				+ "MODULE.SWRMCAT_INDPDT_OL_HRS, "					//  6
+				+ "MODULE.SWRMCAT_PRIVATE_STUDY_HRS1, "				//  7
+				+ "MODULE.SWRMCAT_PRIVATE_STUDY_HOW, "				//  8
+				+ "MODULE.SWRMCAT_TOTAL_CONTACT_HRS, "				//  9
+				+ "MODULE.SWRMCAT_TOTAL_HRS, "						// 10
+				+ "MODULE.SWRTMDS_ACADSTF_CONT_HRS, "				// 11
+				+ "MODULE.SWRTMDS_DLVT_CODE, "						// 12
+				+ "MODULE.SWVDLVT_DESC, "							// 13
+				+ "MODULE.SWRTMDS_LENGTH_HRS, "						// 14
+				+ "MODULE.SWRTMDS_NUMBER_OF_DLVT, "					// 15
+				+ "MODULE.SWRTMDS_STUDENT_HRS, "					// 16
+				+ "MODULE.SWRMCAT_SEMESTER, "						// 17
+				+ "MODULE.SWRMCAT_MULTI_SECTIONS, "					// 18
+				+ "MODULE.SWRMCAT_CREDITS "							// 19
+				+ "FROM MODULE "
+				+ "WHERE (((MODULE.SWRMCAT_SUBJ) = ? ) "
+				+ "AND ((MODULE.SWRMCAT_CRSE_NUMB) = ? )) "
+				+ "ORDER BY MODULE.SWVDLVT_DESC ";
+		PreparedStatement getModule = null;
+	
+	
+		for (ModuleClass mdl : prog.getModules()) {
+			ArrayList<String> line = new ArrayList<String>();
+			ArrayList<ArrayList<String>> oldMod = new ArrayList<ArrayList<String>>();
+			//System.out.println(mdl.getSubjCode()+mdl.getCrseNumb());
+	
+			try {
+				Connection conn = DriverManager.getConnection(url,"","");
+				getModule = conn.prepareStatement(queryModule);
+				getModule.setString(1, mdl.getSubjCode());
+				getModule.setString(2, mdl.getCrseNumb());
+	
+				ResultSet rs = getModule.executeQuery();
+				while (rs.next()) {
+					ArrayList<String> oldLine = new ArrayList<String>();
+					for (int i = 0; i < 20; i++ ) {
+						oldLine.add(rs.getString(i + 1));
+					}
+					oldMod.add(oldLine);
+				}
+			} catch (SQLException ex) {
+				while (ex != null) {
+					System.out.println("SQL Exception: " + ex.getMessage());
+					JOptionPane.showMessageDialog(null,
+							"SQL Exception: " + ex.getMessage(),
+							"ERROR",
+							JOptionPane.ERROR_MESSAGE);
+					ex = ex.getNextException();
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+	
+			if (oldMod.isEmpty()) {
+				line.add(""); 						// 1 SWRMCAT_MODULE_ID
+				line.add(mdl.getTitle());		 	// 2 SWRMCAT_TITLE
+				line.add(mdl.getSubjCode());	 	// 3 SWRMCAT_SUBJ
+				line.add(mdl.getCrseNumb());	 	// 4 SWRMCAT_CRSE_NUMB
+				line.add("");					 	// 5 SWRMCAT_PRE_REQ_MODULE
+				line.add("");						// 6 SWRMCAT_CO_REQ_MODULE
+				line.add("");						// 7 SWRMCAT_INDPDT_OL_HRS
+				line.add("");						// 8 SWRMCAT_PRIVATE_STUDY_HRS1
+				line.add("");						// 9 SWRMCAT_PRIVATE_STUDY_HOW
+				line.add("");						// 10 SWRMCAT_TOTAL_CONTACT_HRS
+				line.add("");						// 11 SWRMCAT_TOTAL_HRS
+				line.add("");						// 12 SWRTMDS_ACADSTF_CONT_HRS
+	
+			} else {
+				line.add(oldMod.get(0).get(0)); 	// 1 SWRMCAT_MODULE_ID
+				line.add(mdl.getTitle());			// 2 SWRMCAT_TITLE
+				line.add(mdl.getSubjCode());		// 3 SWRMCAT_SUBJ
+				line.add(mdl.getCrseNumb());		// 4 SWRMCAT_CRSE_NUMB
+				line.add(oldMod.get(0).get(4));		// 5 SWRMCAT_PRE_REQ_MODULE
+				line.add(oldMod.get(0).get(5));		// 6 SWRMCAT_CO_REQ_MODULE
+				line.add(oldMod.get(0).get(6));		// 7 SWRMCAT_INDPDT_OL_HRS
+				line.add(oldMod.get(0).get(7));		// 8 SWRMCAT_PRIVATE_STUDY_HRS1
+				line.add(oldMod.get(0).get(8));		// 9 SWRMCAT_PRIVATE_STUDY_HOW
+				line.add(oldMod.get(0).get(9));		// 10 SWRMCAT_TOTAL_CONTACT_HRS
+				line.add(oldMod.get(0).get(10));	// 11 SWRMCAT_TOTAL_HRS
+				line.add(oldMod.get(0).get(11));	// 12 SWRTMDS_ACADSTF_CONT_HRS
+	
+			}
+	
+			int actCount = 0;
+			for (ActivityClass act : prog.getActivities()) {
+				if (act.getSubjectCode().equals(mdl.getSubjCode()) &&
+						act.getCourseNumber().equals(mdl.getCrseNumb()) &&
+						act.getSemester().equals(mdl.getSemester())) {
+					ArrayList<String> newLine = new ArrayList<String>();
+					for (String val : line) {
+						newLine.add(val);
+					}
+					int actIdx = 999;
+					for (int i = 0; i < oldMod.size(); i++) {
+						if (oldMod.get(i).get(2).equals(mdl.getSubjCode()) &&
+								oldMod.get(i).get(3).equals(mdl.getCrseNumb()) //&&
+								//(oldMod.get(i).get(17).equals(mdl.getSemester()) || oldMod.get(i).get(18) != null)
+										) {
+							actIdx = i;
+						}
+					}
+	
+					if (actIdx != 999) {
+						newLine.add(oldMod.get(actIdx).get(12));	// 13 SWRTMDS_DLVT_CODE
+	
+					} else {
+						newLine.add("");							// 13 SWRTMDS_DLVT_CODE
+					}
+					newLine.add(act.getDescription()); 			// 14 SWVDLVT_DESC
+					newLine.add(Float.toString(act.getLength())); 	// 15 SWRTMDS_LENGTH
+					if (actIdx != 999) {
+						newLine.add(oldMod.get(actIdx).get(15)); 	// 16 SWRTMDS_NUMBER_OF_DLVT
+						newLine.add(oldMod.get(actIdx).get(16)); 	// 17 SWRTMDS_STUDENT_HRS
+					} else {
+						newLine.add(""); 							// 16 SWRTMDS_NUMBER_OF_DLVT
+						newLine.add(""); 							// 17 SWRTMDS_STUDENT_HRS
+					}
+					newLine.add(act.getSemester());				// 18 SWRTMDS_SEMESTER
+					if (actIdx != 999) {
+						newLine.add(oldMod.get(actIdx).get(18));	// 19 SWRTMDS_MULTI_SECTIONS
+					} else {
+						newLine.add("");							// 19 SWRTMDS_MULTI_SECTIONS
+					}
+					//for (String val : newLine) {
+					//	System.out.print("    "+val);
+					//}
+					newLine.add(Float.toString(mdl.getCredits()));			// 20 SWRTMDS_CREDITS
+					newMod.add(newLine);
+					//System.out.println("");
+					actCount++;
+				}
+			}
+			if (actCount == 0) {
+				line.add("");					// 13 SWRTMDS_DLVT_CODE
+				line.add(""); 					// 14 SWVDLVT_DESC
+				line.add(""); 					// 15 SWRTMDS_LENGTH
+				line.add(""); 					// 16 SWRTMDS_NUMBER_OF_DLVT
+				line.add(""); 					// 17 SWRTMDS_STUDENT_HRS
+				line.add("");					// 18 SWRTMDS_SEMESTER
+				line.add("");					// 19 SWRTMDS_MULTI_SECTIONS
+				line.add(Float.toString(mdl.getCredits()));			// 20 SWRTMDS_CREDITS
+				newMod.add(line);
+			}
+		}
+	
+		/*for (int i = 0; i < newMod.size(); i++) {
+			System.out.println(" ");
+			for (String val : newMod.get(i)) {
+				System.out.println("    "+val);
+			}
+		}*/
+	
+		return newMod;
+	}
+
+	/**
+	 * Store information in ACCESS database PROGRAM table
+	 * Stores mutually exclusive group information in ACCESS database PROGGROUP_EXCL table. 
+	 * 
+	 * @param ProgrammeClass, Array in ACCESS table PROGRAM format
+	 */
 	private void updateProg(ProgrammeClass prog, ArrayList<ArrayList<String>> newProg) {
 		String deleteProgram = "DELETE  "
 				+ "FROM PROGRAM "
@@ -624,169 +833,11 @@ public class LoadProgramme {
 		}
 	}
 
-	private ArrayList<ArrayList<String>> getModData(ProgrammeClass prog) {
-		ArrayList<ArrayList<String>> newMod = new ArrayList<ArrayList<String>>();
-
-		String queryModule = "SELECT MODULE.SWRMCAT_MODULE_ID, "	//  0
-				+ "MODULE.SWRMCAT_TITLE, "							//  1
-				+ "MODULE.SWRMCAT_SUBJ, "							//  2
-				+ "MODULE.SWRMCAT_CRSE_NUMB, "						//  3
-				+ "MODULE.SWRMCAT_PRE_REQ_MODULE, "					//  4
-				+ "MODULE.SWRMCAT_CO_REQ_MODULE, "					//  5
-				+ "MODULE.SWRMCAT_INDPDT_OL_HRS, "					//  6
-				+ "MODULE.SWRMCAT_PRIVATE_STUDY_HRS1, "				//  7
-				+ "MODULE.SWRMCAT_PRIVATE_STUDY_HOW, "				//  8
-				+ "MODULE.SWRMCAT_TOTAL_CONTACT_HRS, "				//  9
-				+ "MODULE.SWRMCAT_TOTAL_HRS, "						// 10
-				+ "MODULE.SWRTMDS_ACADSTF_CONT_HRS, "				// 11
-				+ "MODULE.SWRTMDS_DLVT_CODE, "						// 12
-				+ "MODULE.SWVDLVT_DESC, "							// 13
-				+ "MODULE.SWRTMDS_LENGTH_HRS, "						// 14
-				+ "MODULE.SWRTMDS_NUMBER_OF_DLVT, "					// 15
-				+ "MODULE.SWRTMDS_STUDENT_HRS, "					// 16
-				+ "MODULE.SWRMCAT_SEMESTER, "						// 17
-				+ "MODULE.SWRMCAT_MULTI_SECTIONS, "					// 18
-				+ "MODULE.SWRMCAT_CREDITS "							// 19
-				+ "FROM MODULE "
-				+ "WHERE (((MODULE.SWRMCAT_SUBJ) = ? ) "
-				+ "AND ((MODULE.SWRMCAT_CRSE_NUMB) = ? )) "
-				+ "ORDER BY MODULE.SWVDLVT_DESC ";
-		PreparedStatement getModule = null;
-
-
-		for (ModuleClass mdl : prog.getModules()) {
-			ArrayList<String> line = new ArrayList<String>();
-			ArrayList<ArrayList<String>> oldMod = new ArrayList<ArrayList<String>>();
-			//System.out.println(mdl.getSubjCode()+mdl.getCrseNumb());
-
-			try {
-				Connection conn = DriverManager.getConnection(url,"","");
-				getModule = conn.prepareStatement(queryModule);
-				getModule.setString(1, mdl.getSubjCode());
-				getModule.setString(2, mdl.getCrseNumb());
-
-				ResultSet rs = getModule.executeQuery();
-				while (rs.next()) {
-					ArrayList<String> oldLine = new ArrayList<String>();
-					for (int i = 0; i < 20; i++ ) {
-						oldLine.add(rs.getString(i + 1));
-					}
-					oldMod.add(oldLine);
-				}
-			} catch (SQLException ex) {
-				while (ex != null) {
-					System.out.println("SQL Exception: " + ex.getMessage());
-					JOptionPane.showMessageDialog(null,
-							"SQL Exception: " + ex.getMessage(),
-							"ERROR",
-							JOptionPane.ERROR_MESSAGE);
-					ex = ex.getNextException();
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			if (oldMod.isEmpty()) {
-				line.add(""); 						// 1 SWRMCAT_MODULE_ID
-				line.add(mdl.getTitle());		 	// 2 SWRMCAT_TITLE
-				line.add(mdl.getSubjCode());	 	// 3 SWRMCAT_SUBJ
-				line.add(mdl.getCrseNumb());	 	// 4 SWRMCAT_CRSE_NUMB
-				line.add("");					 	// 5 SWRMCAT_PRE_REQ_MODULE
-				line.add("");						// 6 SWRMCAT_CO_REQ_MODULE
-				line.add("");						// 7 SWRMCAT_INDPDT_OL_HRS
-				line.add("");						// 8 SWRMCAT_PRIVATE_STUDY_HRS1
-				line.add("");						// 9 SWRMCAT_PRIVATE_STUDY_HOW
-				line.add("");						// 10 SWRMCAT_TOTAL_CONTACT_HRS
-				line.add("");						// 11 SWRMCAT_TOTAL_HRS
-				line.add("");						// 12 SWRTMDS_ACADSTF_CONT_HRS
-
-			} else {
-				line.add(oldMod.get(0).get(0)); 	// 1 SWRMCAT_MODULE_ID
-				line.add(mdl.getTitle());			// 2 SWRMCAT_TITLE
-				line.add(mdl.getSubjCode());		// 3 SWRMCAT_SUBJ
-				line.add(mdl.getCrseNumb());		// 4 SWRMCAT_CRSE_NUMB
-				line.add(oldMod.get(0).get(4));		// 5 SWRMCAT_PRE_REQ_MODULE
-				line.add(oldMod.get(0).get(5));		// 6 SWRMCAT_CO_REQ_MODULE
-				line.add(oldMod.get(0).get(6));		// 7 SWRMCAT_INDPDT_OL_HRS
-				line.add(oldMod.get(0).get(7));		// 8 SWRMCAT_PRIVATE_STUDY_HRS1
-				line.add(oldMod.get(0).get(8));		// 9 SWRMCAT_PRIVATE_STUDY_HOW
-				line.add(oldMod.get(0).get(9));		// 10 SWRMCAT_TOTAL_CONTACT_HRS
-				line.add(oldMod.get(0).get(10));	// 11 SWRMCAT_TOTAL_HRS
-				line.add(oldMod.get(0).get(11));	// 12 SWRTMDS_ACADSTF_CONT_HRS
-
-			}
-
-			int actCount = 0;
-			for (ActivityClass act : prog.getActivities()) {
-				if (act.getSubjectCode().equals(mdl.getSubjCode()) &&
-						act.getCourseNumber().equals(mdl.getCrseNumb()) &&
-						act.getSemester().equals(mdl.getSemester())) {
-					ArrayList<String> newLine = new ArrayList<String>();
-					for (String val : line) {
-						newLine.add(val);
-					}
-					int actIdx = 999;
-					for (int i = 0; i < oldMod.size(); i++) {
-						if (oldMod.get(i).get(2).equals(mdl.getSubjCode()) &&
-								oldMod.get(i).get(3).equals(mdl.getCrseNumb()) &&
-								oldMod.get(i).get(17).equals(mdl.getSemester())) {
-							actIdx = i;
-						}
-					}
-
-					if (actIdx != 999) {
-						newLine.add(oldMod.get(actIdx).get(12));	// 13 SWRTMDS_DLVT_CODE
-
-					} else {
-						newLine.add("");							// 13 SWRTMDS_DLVT_CODE
-					}
-					newLine.add(act.getDescription()); 			// 14 SWVDLVT_DESC
-					newLine.add(Float.toString(act.getLength())); 	// 15 SWRTMDS_LENGTH
-					if (actIdx != 999) {
-						newLine.add(oldMod.get(actIdx).get(15)); 	// 16 SWRTMDS_NUMBER_OF_DLVT
-						newLine.add(oldMod.get(actIdx).get(16)); 	// 17 SWRTMDS_STUDENT_HRS
-					} else {
-						newLine.add(""); 							// 16 SWRTMDS_NUMBER_OF_DLVT
-						newLine.add(""); 							// 17 SWRTMDS_STUDENT_HRS
-					}
-					newLine.add(act.getSemester());				// 18 SWRTMDS_SEMESTER
-					if (actIdx != 999) {
-						newLine.add(oldMod.get(actIdx).get(18));	// 19 SWRTMDS_MULTI_SECTIONS
-					} else {
-						newLine.add("");							// 19 SWRTMDS_MULTI_SECTIONS
-					}
-					//for (String val : newLine) {
-					//	System.out.print("    "+val);
-					//}
-					newLine.add(Float.toString(mdl.getCredits()));			// 20 SWRTMDS_CREDITS
-					newMod.add(newLine);
-					//System.out.println("");
-					actCount++;
-				}
-			}
-			if (actCount == 0) {
-				line.add("");					// 13 SWRTMDS_DLVT_CODE
-				line.add(""); 					// 14 SWVDLVT_DESC
-				line.add(""); 					// 15 SWRTMDS_LENGTH
-				line.add(""); 					// 16 SWRTMDS_NUMBER_OF_DLVT
-				line.add(""); 					// 17 SWRTMDS_STUDENT_HRS
-				line.add("");					// 18 SWRTMDS_SEMESTER
-				line.add("");					// 19 SWRTMDS_MULTI_SECTIONS
-				line.add(Float.toString(mdl.getCredits()));			// 20 SWRTMDS_CREDITS
-				newMod.add(line);
-			}
-		}
-
-		/*for (int i = 0; i < newMod.size(); i++) {
-			System.out.println(" ");
-			for (String val : newMod.get(i)) {
-				System.out.println("    "+val);
-			}
-		}*/
-
-		return newMod;
-	}
-
+	/**
+	 * Store information in ACCESS database MODULE table
+	 * 
+	 * @param Array in ACCESS table MODULE format
+	 */
 	private void updateMod(ArrayList<ArrayList<String>> newMod) {
 		String deleteMdl = "DELETE  "
 				+ "FROM MODULE "

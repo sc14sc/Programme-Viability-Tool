@@ -34,6 +34,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * This class reads the supplied Microsoft Access database for individual programme years 
+ * and enables you to select one programme year.
+ * 
+ * @author Sitong Chen
+ *
+ */
 public class SelectProgDB extends JDialog {
 	//https://www.tutorialspoint.com/swing/swing_jlist.htm	
 	//http://www.java2s.com/Tutorial/Java/0240__Swing/ASimpleModalDialog.htm
@@ -46,6 +53,11 @@ public class SelectProgDB extends JDialog {
 	//private JTextField yearText = new JTextField("",3);
 	private List <String> progLocs = new ArrayList <String>();
 	
+	/**
+	 * Outputs a list of programme years, with a search box which goes to the nearest
+	 * matching programme as characters are entered into the search box.
+	 * 
+	 */
 	public SelectProgDB(JFrame parent, String title, final String currProg) {
 		super(parent, title, true);
 		if (parent != null) {
@@ -208,6 +220,10 @@ public class SelectProgDB extends JDialog {
 	    setVisible(true);
 	}
 	
+	/**
+	 * @return the stored program code and year 
+	 * 
+	 */
 	public String[] getProgCode() {
 		return result;
 	}

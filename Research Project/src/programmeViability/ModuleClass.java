@@ -4,6 +4,8 @@
 package programmeViability;
 
 /**
+ * Holds module level information
+ * 
  * @author Sitong Chen
  *
  */
@@ -30,52 +32,6 @@ public class ModuleClass {
 	}
 
 	/**
-	 * @return the semester
-	 */
-	public String getSemester() {
-		return semester;
-	}
-
-	/**
-	 * @return the credits
-	 */
-	public float getCredits() {
-		return credits;
-	}
-
-	/**
-	 * @return the hoursPerWeek
-	 */
-	public float getHoursPerWeek() {
-		return hoursPerWeek;
-	}
-
-	/**
-	 * @param hoursPerWeek the hoursPerWeek to set
-	 */
-	public void setHoursPerWeek(float hoursPerWeek) {
-		this.hoursPerWeek = hoursPerWeek;
-	}
-	
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * @return the optionalGroup
-	 */
-	public String getOptionalGroup() {
-		return optionalGroup;
-	}
-
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
 	 * @return the subjCode
 	 */
 	public String getSubjCode() {
@@ -89,24 +45,88 @@ public class ModuleClass {
 		return crseNumb;
 	}
 
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @param title
+	 */
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	/**
+	 * @return the semester
+	 */
+	public String getSemester() {
+		return semester;
 	}
 
-	public void setOptionalGroup(String optionalGroup) {
-		this.optionalGroup = optionalGroup;
-	}
-
+	/**
+	 * @param semester
+	 */
 	public void setSemester(String semester) {
 		this.semester = semester;
 	}
 
+	/**
+	 * @return the Type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return the optionalGroup
+	 */
+	public String getOptionalGroup() {
+		return optionalGroup;
+	}
+
+	/**
+	 * @param optionalGroup
+	 */
+	public void setOptionalGroup(String optionalGroup) {
+		this.optionalGroup = optionalGroup;
+	}
+
+	/**
+	 * @return the credits
+	 */
+	public float getCredits() {
+		return credits;
+	}
+
+	/**
+	 * @param credits
+	 */
 	public void setCredits(float credits) {
 		this.credits = credits;
+	}
+
+	/**
+	 * @return the hoursPerWeek 
+	 */
+	public float getHoursPerWeek() {
+		return hoursPerWeek;
+	}
+
+	/**
+	 * @param hoursPerWeek the hoursPerWeek to set
+	 */
+	public void setHoursPerWeek(float hoursPerWeek) {
+		this.hoursPerWeek = hoursPerWeek;
 	}
 
 

@@ -7,6 +7,10 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
 
+/**
+ * @author Sitong Chen
+ *
+ */
 public class TableMouseListener extends MouseAdapter {
 	
 	private JTable table;

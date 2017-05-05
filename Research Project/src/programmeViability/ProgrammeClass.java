@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Sitong Chen
+ * The ProgrammeClass holds all the information about a programme year, and has the methods written
+ * to maintain the list of groups, modules and activities. The ProgrammeClass object is all that needs to be passed for any other class to have complete 
+ * information about the Programme Year.
  *
+ * @author Sitong Chen
+ * 
  */
 public class ProgrammeClass {
 	
@@ -18,49 +22,18 @@ public class ProgrammeClass {
 	private List<GroupClass> groups = new ArrayList <GroupClass>();
 	private List<ModuleClass> modules = new ArrayList <ModuleClass>();
 	private List<ActivityClass> activities = new ArrayList <ActivityClass>();
-	private List<ArrayList<String>> grpGrps= new ArrayList<ArrayList<String>>();
+	private List<ArrayList<String>> grpSets= new ArrayList<ArrayList<String>>();
 	
 	/**
-	 * @return the activities
+	 * The minimum information to create a ProgrammeClass instance is:
+	 * @param progCode
+	 * @param progShortTitle
+	 * @param year
 	 */
-	public List<ActivityClass> getActivities() {
-		return activities;
-	}
-
-	/**
-	 * @return the modules
-	 */
-	public List<ModuleClass> getModules() {
-		return modules;
-	}
-
-	/**
-	 * @param modules the modules to set
-	 */
-	public void setModules(List<ModuleClass> modules) {
-		this.modules = modules;
-	}
-
-	/**
-	 * @return the groups
-	 */
-	public List<GroupClass> getGroups() {
-		return groups;
-	}
-
-	/**
-	 * @param groups the groups to set
-	 */
-	public void setGroups(List<GroupClass> groups) {
-		this.groups = groups;
-	}
-
-	public ProgrammeClass (String progCode, String progShortTitle, String year) {
-		
+	public ProgrammeClass (String progCode, String progShortTitle, String year) {		
 		this.progCode = progCode;
 		this.progShortTitle = progShortTitle;
-		this.year = year;
-		
+		this.year = year;		
 	}
 
 	/**
@@ -83,7 +56,26 @@ public class ProgrammeClass {
 	public String getYear() {
 		return year;
 	}
-	
+
+	/**
+	 * @return all the groups in a ProgrammeClass
+	 */
+	public List<GroupClass> getGroups() {
+		return groups;
+	}
+
+	/**
+	 * @param set all the groups in a ProgrammeClass
+	 */
+	public void setGroups(List<GroupClass> groups) {
+		this.groups = groups;
+	}
+
+	/**
+	 * Finds individual group specified by a String (e.g. "OPTA") and returns one GroupClass object 
+	 * 
+	 * @return one group
+	 */
 	public GroupClass getGroup(String group) {
 		GroupClass grp = null;
 		for (int i = 0; i < groups.size(); i++) {
@@ -94,42 +86,12 @@ public class ProgrammeClass {
 		return grp;
 	}
 	
-	public ModuleClass getModule(String module) {
-		ModuleClass mod = null;
-		for (int i = 0; i < modules.size(); i++) {
-			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb() + modules.get(i).getSemester())) {
-				mod = modules.get(i);
-			}
-		}
-		return mod;
-	}
-	
-	public ActivityClass getActivity(String module, int index) {
-		ActivityClass act = null;
-		for (int i = 0; i < activities.size(); i++) {
-			if (module.equals(activities.get(i).getSubjectCode() + activities.get(i).getCourseNumber()) &&
-					index == activities.get(i).getIndex()) {
-				act = activities.get(i);
-			}
-		}
-		return act;
-	}
-	
-	public void deleteModule(String module) {
-		for (int i = 0; i < modules.size(); i++) {
-			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb())) {
-				for (int j = activities.size() -1 ; j > -1; j--) {
-					if (activities.get(j).getSubjectCode().equals(modules.get(i).getSubjCode()) &&
-							activities.get(j).getCourseNumber().equals(modules.get(i).getCrseNumb())) {
-						System.out.println(activities.get(j).getSubjectCode()+activities.get(j).getCourseNumber()+activities.get(j).getDescription() );
-						activities.remove(j);
-					}
-				}
-				modules.remove(i);
-			}
-		}
-	}
-	
+	/**
+	 * Adds a Group to the list of Groups stored in ProgrammeClass
+	 * Groups have to be added in order COMP, then OPT, then ELEC, sorted by Optional Group within these Types.
+	 * Have to write my own routine to do this, as collections.sort cannot sort class objects in this way. 
+	 * 
+	 */
 	public void addGroup(GroupClass grp) {
 		//System.out.println(grp.getType() + " " + grp.getOptionalGroup());
 		boolean added = false;
@@ -231,20 +193,15 @@ public class ProgrammeClass {
 			added = true;
 		}
 
-						/*int result = grp.getOptionalGroup().compareTo(groups.get(i).getOptionalGroup());
-						if (result < 0) {
-							groupSort.add(grp);
-							groupSort.add(groups.get(i));							
-						} else {
-							groupSort.add(groups.get(i));							
-					
-		}*/
 		//for (int i = 0; i < groupSort.size(); i++) {
 		//	System.out.println(i + " " + groupSort.get(i).getType() + " " + groupSort.get(i).getOptionalGroup());
 		//}
 		groups = groupSort;
 	}
 	
+	/**
+	 * DeleteGroup simply a matter of removing Group from the ProgrammClass list of groups.
+	 */
 	public void deleteGroup(String[] grp) {
 		for (int i = 0; i < groups.size(); i++) {
 			if (groups.get(i).getType().equals(grp[0]) && groups.get(i).getOptionalGroup().equals(grp[1])) {
@@ -254,6 +211,10 @@ public class ProgrammeClass {
 	}
 	
 	
+	/**
+	 * Find the group in the ProgrammeClass list of groups, and set this group to the new object.
+	 * If Min or Max Credits for the type have been changed, then every group of that type must be updated to the new value.
+	 */
 	public void updateGroup(GroupClass group) {
 		for (int i = 0; i < groups.size(); i++) {
 			if (group.getType().equals(groups.get(i).getType())) {
@@ -266,6 +227,57 @@ public class ProgrammeClass {
 			}
 		}
 	}
+
+	/**
+	 * @return the list of all modules in the ProgrammeClass
+	 */
+	public List<ModuleClass> getModules() {
+		return modules;
+	}
+
+	/**
+	 * set the list of all modules in the ProgrammeClass
+	 */
+	public void setModules(List<ModuleClass> modules) {
+		this.modules = modules;
+	}
+
+	/**
+	 * @return the ModuleClass specified by the input string which consist of
+	 *         Subject, Course, Semester (e.g. CLAS32502)
+	 */
+	public ModuleClass getModule(String module) {
+		ModuleClass mod = null;
+		for (int i = 0; i < modules.size(); i++) {
+			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb() + modules.get(i).getSemester())) {
+				mod = modules.get(i);
+			}
+		}
+		return mod;
+	}
+
+	/**
+	 * Deletes the module from the ProgrammeClass list of modules specified by the input string which consist of
+	 *         Subject, Course, Semester (e.g. CLAS32502)
+	 */
+	public void deleteModule(String module) {
+		for (int i = 0; i < modules.size(); i++) {
+			if (module.equals(modules.get(i).getSubjCode() + modules.get(i).getCrseNumb())) {
+				for (int j = activities.size() -1 ; j > -1; j--) {
+					if (activities.get(j).getSubjectCode().equals(modules.get(i).getSubjCode()) &&
+							activities.get(j).getCourseNumber().equals(modules.get(i).getCrseNumb())) {
+						System.out.println(activities.get(j).getSubjectCode()+activities.get(j).getCourseNumber()+activities.get(j).getDescription() );
+						activities.remove(j);
+					}
+				}
+				modules.remove(i);
+			}
+		}
+	}
+
+	/**
+	 * Updates the appropriate module in the ProgrammeClass module list
+	 */
 	public void updateModule(ModuleClass module) {
 		for (int i = 0; i < modules.size(); i++) {
 			if (module.getSubjCode().equals(modules.get(i).getSubjCode()) &&
@@ -275,10 +287,34 @@ public class ProgrammeClass {
 			}
 		}
 	}
+
+	/**
+	 * @return the list of all activities in the ProgrammeClass
+	 */
+	public List<ActivityClass> getActivities() {
+		return activities;
+	}
+
+	/**
+	 * @return an individual activity for the received module and activity index number
+	 */
+	public ActivityClass getActivity(String module, int index) {
+		ActivityClass act = null;
+		for (int i = 0; i < activities.size(); i++) {
+			if (module.equals(activities.get(i).getSubjectCode() + activities.get(i).getCourseNumber()) &&
+					index == activities.get(i).getIndex()) {
+				act = activities.get(i);
+			}
+		}
+		return act;
+	}
 	
+	/**
+	 * @param an individual activity for the received module and activity index number
+	 */
 	public void updateActivity(ActivityClass activity) {
 		for (int i = 0; i < activities.size(); i++) {
-			if (activity.getDescription().equals(activities.get(i).getDescription()) &&
+			if (activity.getIndex() == activities.get(i).getIndex() &&
 					activity.getSubjectCode().equals(activities.get(i).getSubjectCode())
 					&& activity.getCourseNumber().equals(activities.get(i).getCourseNumber())) {
 				activities.set(i, activity);
@@ -286,6 +322,10 @@ public class ProgrammeClass {
 		}
 	}
 	
+	/**
+	 * Deletes an individual activity for the received module, activity description and activity index number
+	 * @return the recalculated total weekly module hours
+	 */
 	public Float deleteActivity(int index, String activity, ModuleClass mod) {
 		Float hrs = mod.getHoursPerWeek();
 		for (int i = 0; i < activities.size(); i++) {
@@ -300,15 +340,12 @@ public class ProgrammeClass {
 		return hrs;
 	}
 	
-	public List<ArrayList<String>> getGrpGrps() {
-		return grpGrps;
-	}
-
-	public void setGrpGrps(List<ArrayList<String>> grpGrps) {
-		this.grpGrps = grpGrps;
-	}
-
-	public List<ArrayList<String>> createGrpGrps() {
+	/**
+	 * When groups are mutually exclusive with other groups, need to calculate a list of group sets
+	 * e.g. COMP,OPTA,ELECA and COMP,OPTB,ELECA if OPTA is mutually exclusive with OPTB
+	 * @return list of group lists 
+	 */
+	public List<ArrayList<String>> createGrpSets() {
 		List<ArrayList<String>> stringArrayFinal = new ArrayList<ArrayList<String>>();
 		List<ArrayList<String>> stringArrayFinalDeDup = new ArrayList<ArrayList<String>>();
 		
@@ -355,7 +392,7 @@ public class ProgrammeClass {
 						//System.out.println("   1.Adding newGrp1 " + newGrp1);
 						stringArray.add(newGrp1);											
 					}
-
+	
 					//System.out.println("   newGrp2 " + newGrp2);
 					for (String exStr : grp.getExGroup()) {
 						if (exStr.compareTo(grp.getOptionalGroup()) > 0) {
@@ -404,5 +441,19 @@ public class ProgrammeClass {
 			}
 		}
 		return stringArrayFinalDeDup;
+	}
+
+	/**
+	 * @return list of group lists, e.g. COMP,OPTA,ELECA and COMP,OPTB,ELECA if OPTA is mutually exclusive with OPTB
+	 */
+	public List<ArrayList<String>> getGrpSets() {
+		return grpSets;
+	}
+
+	/**
+	 * Set the ProgrammeClass list of group sets 
+	 */
+	public void setGrpSets(List<ArrayList<String>> grpSets) {
+		this.grpSets = grpSets;
 	}
 }
